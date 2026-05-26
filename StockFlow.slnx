@@ -1,3 +1,7 @@
 <Solution>
   <Project Path="StockFlow.Api/StockFlow.Api.csproj" />
+  <Project Path="StockFlow.Application/StockFlow.Application.csproj" Id="0413d52e-18f4-41d4-968b-be4f254ece74" />
+  <Project Path="StockFlow.Domain/StockFlow.Domain.csproj" Id="6ef96868-49bc-48f4-bcc9-4700795f0831" />
+  <Project Path="StockFlow.Infrastructure/StockFlow.Infrastructure.csproj" Id="02c1bcb7-103f-41db-b356-65c4d286166f" />
+  <Project Path="StockFlow.Web/StockFlow.Web.csproj" Id="b8e7fc48-3026-4a94-94ed-9410daa747a4" />
 </Solution>
