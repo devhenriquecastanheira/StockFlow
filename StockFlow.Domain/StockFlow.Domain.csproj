@@ -6,4 +6,8 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+  <ItemGroup>
+    <Compile Remove="Enums\Class1.cs" />
+  </ItemGroup>
+
 </Project>
