@@ -1,0 +1,16 @@
+﻿using StockFlow.Domain.Entities;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace StockFlow.Domain.Interfaces;
+
+public interface IStockService
+{
+    Task<List<StockItem>> GetStockItemsAsync();
+    Task<StockItem?> GetStockItemAsync(int productVariantId, int warehouseId);
+    Task<List<StockMovement>> GetMovementsAsync(int productVariantId);
+    Task<StockMovement> RegisterMovementAsync(StockMovement movement);
+}

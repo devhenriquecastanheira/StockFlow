@@ -2,6 +2,7 @@ using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 using StockFlow.Application.Categories;
 using StockFlow.Application.Products;
+using StockFlow.Application.Stock;
 using StockFlow.Domain.Entities;
 using StockFlow.Domain.Interfaces;
 using StockFlow.Infrastructure.Data;
@@ -23,6 +24,10 @@ builder.Services.AddScoped<IValidator<Category>, CategoryValidator>();
 builder.Services.AddScoped<IProductRepository, ProductRepository>();
 builder.Services.AddScoped<IProductService, ProductService>();
 builder.Services.AddScoped<IValidator<Product>, ProductValidator>();
+
+builder.Services.AddScoped<IStockRepository, StockRepository>();
+builder.Services.AddScoped<IStockService, StockService>();
+builder.Services.AddScoped<IValidator<StockMovement>, StockMovementValidator>();
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
