@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using StockFlow.Application.Categories;
 using StockFlow.Application.Products;
 using StockFlow.Application.Stock;
+using StockFlow.Application.Suppliers;
 using StockFlow.Domain.Entities;
 using StockFlow.Domain.Interfaces;
 using StockFlow.Infrastructure.Data;
@@ -24,6 +25,10 @@ builder.Services.AddScoped<IValidator<Category>, CategoryValidator>();
 builder.Services.AddScoped<IProductRepository, ProductRepository>();
 builder.Services.AddScoped<IProductService, ProductService>();
 builder.Services.AddScoped<IValidator<Product>, ProductValidator>();
+
+builder.Services.AddScoped<ISupplierRepository, SupplierRepository>();
+builder.Services.AddScoped<ISupplierService, SupplierService>();
+builder.Services.AddScoped<IValidator<Supplier>, SupplierValidator>();
 
 builder.Services.AddScoped<IStockRepository, StockRepository>();
 builder.Services.AddScoped<IStockService, StockService>();
