@@ -1,0 +1,42 @@
+@model IReadOnlyList<CategoryViewModel>
+
+@{
+    ViewData["Title"] = "Categorias";
+}
+
+<h1>Categorias</h1>
+
+<p>
+    <a asp-action="Create">Nova categoria</a>
+</p>
+
+@if (Model.Count == 0)
+{
+    <p>Nenhuma categoria cadastrada.</p>
+}
+else
+{
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Nome</th>
+                    <th>Descrição</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var category in Model)
+                {
+                    <tr>
+                        <td class="fw-medium">@category.Name</td>
+                        <td class="text-secondary">@(string.IsNullOrWhiteSpace(category.Description) ? "-" : category.Description)</td>
+                        <td>
+                            <a asp-action="Edit" asp-route-id="@category.Id">Editar</a> |
+                            <a asp-action="Details" asp-route-id="@category.Id">Detalhes</a> |
+                            <a asp-action="Delete" asp-route-id="@category.Id">Excluir</a>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+}
