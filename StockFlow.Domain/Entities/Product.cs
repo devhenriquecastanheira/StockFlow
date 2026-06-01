@@ -14,7 +14,7 @@ public class Product
     public decimal CostPrice { get; set; }
     public decimal SalePrice { get; set; }
     public int CategoryId { get; set; }
-    public Category Category { get; set; } = null!;
+    public Category? Category { get; set; }
     public ICollection<ProductVariant> Variants { get; set; } = [];
     public ICollection<ProductImage> Images { get; set; } = [];
     public ICollection<ProductTag> ProductTags { get; set; } = [];
