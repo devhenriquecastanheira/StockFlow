@@ -19,7 +19,6 @@ public class StockRepository : IStockRepository
         return await _context.StockItems
             .AsNoTracking()
             .Include(stockItem => stockItem.ProductVariant)
-                .ThenInclude(productVariant => productVariant.Product)
             .Include(stockItem => stockItem.Warehouse)
             .ToListAsync();
     }
@@ -39,7 +38,6 @@ public class StockRepository : IStockRepository
         return await _context.StockMovements
             .AsNoTracking()
             .Include(movement => movement.ProductVariant)
-                .ThenInclude(productVariant => productVariant.Product)
             .Include(movement => movement.Warehouse)
             .Where(movement => movement.ProductVariantId == productVariantId)
             .OrderByDescending(movement => movement.CreatedAt)

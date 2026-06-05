@@ -1,0 +1,30 @@
+@model StockMovementViewModel
+
+@{
+    ViewData["Title"] = "Nova movimentação";
+}
+
+<h1>Nova movimentação</h1>
+
+<h4>Movimentação de estoque</h4>
+<hr />
+
+<div class="row">
+    <div class="col-md-4">
+        <form asp-action="Create" method="post">
+            <partial name="_Form" model="Model" />
+
+            <div class="form-group">
+                <input type="submit" value="Salvar" class="btn btn-primary" />
+            </div>
+        </form>
+    </div>
+</div>
+
+<div>
+    <a asp-action="Index">Voltar</a>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

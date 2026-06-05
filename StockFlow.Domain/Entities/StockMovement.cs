@@ -11,9 +11,9 @@ public class StockMovement
 {
     public int Id { get; set; }
     public int ProductVariantId { get; set; }
-    public ProductVariant ProductVariant { get; set; } = null!;
+    public ProductVariant? ProductVariant { get; set; }
     public int WarehouseId { get; set; }
-    public Warehouse Warehouse { get; set; } = null!;
+    public Warehouse? Warehouse { get; set; }
     public StockMovementType Type { get; set; }
     public int Quantity { get; set; }
     public DateTime CreatedAt { get; set; }
