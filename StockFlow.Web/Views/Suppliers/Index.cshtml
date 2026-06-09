@@ -1,0 +1,44 @@
+@model IReadOnlyList<SupplierViewModel>
+
+@{
+    ViewData["Title"] = "Fornecedores";
+}
+
+<h1>Fornecedores</h1>
+
+<p>
+    <a asp-action="Create">Novo fornecedor</a>
+</p>
+
+@if (Model.Count == 0)
+{
+    <p>Nenhum fornecedor cadastrado.</p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Nome</th>
+                <th>E-mail</th>
+                <th>Telefone</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var supplier in Model)
+            {
+                <tr>
+                    <td class="fw-medium">@supplier.Name</td>
+                    <td class="text-secondary">@supplier.Email</td>
+                    <td class="text-secondary">@supplier.Phone</td>
+                    <td>
+                        <a asp-action="Edit" asp-route-id="@supplier.Id">Editar</a> |
+                        <a asp-action="Details" asp-route-id="@supplier.Id">Detalhes</a> |
+                        <a asp-action="Delete" asp-route-id="@supplier.Id">Excluir</a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
