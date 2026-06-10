@@ -1,0 +1,26 @@
+﻿@model OrderViewModel
+
+<div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+<div class="form-group mb-3">
+    <label asp-for="CustomerName" class="control-label"></label>
+    <input asp-for="CustomerName" class="form-control" autocomplete="off" />
+    <span asp-validation-for="CustomerName" class="text-danger"></span>
+</div>
+
+<div class="form-group mb-3">
+    <label asp-for="CustomerEmail" class="control-label"></label>
+    <input asp-for="CustomerEmail" class="form-control" autocomplete="off" />
+    <span asp-validation-for="CustomerEmail" class="text-danger"></span>
+</div>
+
+@if (ViewData["IsEdit"] as bool? == true)
+{
+    <div class="form-group mb-3">
+        <label asp-for="Status" class="control-label"></label>
+        <select asp-for="Status"
+                asp-items="Html.GetEnumSelectList<OrderStatusViewModel>()"
+                class="form-select"></select>
+        <span asp-validation-for="Status" class="text-danger"></span>
+    </div>
+}

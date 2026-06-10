@@ -1,6 +1,7 @@
 ﻿using FluentValidation;
 using StockFlow.Application.Suppliers;
 using StockFlow.Domain.Entities;
+using StockFlow.Domain.Enums;
 using StockFlow.Domain.Interfaces;
 using System;
 using System.Collections.Generic;
@@ -35,7 +36,11 @@ public class OrderService : IOrderService
 
     public async Task<Order> AddOrderAsync(Order order)
     {
+        order.Status = OrderStatus.Pending;
+        order.CreatedAt = DateTime.UtcNow;
+
         await _orderValidator.ValidateAndThrowAsync(order);
+
         await _orderRepository.AddAsync(order);
 
         return order;
