@@ -1,0 +1,42 @@
+﻿@model IReadOnlyList<OrderViewModel>
+
+@{
+    ViewData["Title"] = "Pedidos";
+}
+
+<h1>Pedidos</h1>
+
+<p>
+    <a asp-action="Create">Novo pedido</a>
+</p>
+
+@if (Model.Count == 0)
+{
+    <p>Nenhum pedido cadastrado.</p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Nome do Cliente</th>
+                <th>Email do Cliente</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var order in Model)
+            {
+                <tr>
+                    <td class="fw-medium">@order.CustomerName</td>
+                    <td class="text-secondary">@(string.IsNullOrWhiteSpace(order.CustomerEmail) ? "-" : order.CustomerEmail)</td>
+                    <td>
+                        <a asp-action="Edit" asp-route-id="@order.Id">Editar</a> |
+                        <a asp-action="Details" asp-route-id="@order.Id">Detalhes</a> |
+                        <a asp-action="Delete" asp-route-id="@order.Id">Excluir</a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
