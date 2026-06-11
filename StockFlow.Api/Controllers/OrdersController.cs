@@ -1,6 +1,8 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using StockFlow.Application.Orders;
 using StockFlow.Domain.Entities;
+using StockFlow.Domain.Enums;
 using StockFlow.Domain.Interfaces;
 
 namespace StockFlow.Api.Controllers;
@@ -57,6 +59,39 @@ public class OrdersController : ControllerBase
     {
         var deleted = await _orderService.DeleteOrderAsync(id);
         if (!deleted)
+        {
+            return NotFound();
+        }
+        return NoContent();
+    }
+
+    [HttpPatch("{id}/status")]
+    public async Task<ActionResult<Order>> ChangeStatus(int id, OrderStatus newStatus)
+    {
+        var updatedOrder = await _orderService.ChangeOrderStatusAsync(id, newStatus);
+        if (updatedOrder == null)
+        {
+            return NotFound();
+        }
+        return Ok(updatedOrder);
+    }
+
+    [HttpPost("{orderId}/items")]
+    public async Task<ActionResult<Order>> AddItem(int orderId, CreateOrderItemDto item)
+    {
+        var updatedOrder = await _orderService.AddOrderItemAsync(orderId, item);
+        if (updatedOrder == null)
+        {
+            return NotFound();
+        }
+        return Ok(updatedOrder);
+    }
+
+    [HttpDelete("{orderId}/items")]
+    public async Task<ActionResult> RemoveItem(int orderId, int itemId)
+    {
+        var removedItem = await _orderService.RemoveOrderItemAsync(orderId, itemId);
+        if (removedItem is null)
         {
             return NotFound();
         }

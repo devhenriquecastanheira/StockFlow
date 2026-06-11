@@ -78,4 +78,52 @@ public class OrderService : IOrderService
 
         return true;
     }
+
+    public async Task<Order?> ChangeOrderStatusAsync(int id, OrderStatus newStatus)
+    {
+        var order = await _orderRepository.GetByIdAsync(id);
+        if (order is null)
+        {
+            return null;
+        }
+        order.Status = newStatus;
+        await _orderRepository.UpdateAsync(order);
+        return order;
+    }
+
+    public async Task<Order?> AddOrderItemAsync(int orderId, CreateOrderItemDto item)
+    {
+        var order = await _orderRepository.GetByIdAsync(orderId);
+        if (order is null)
+        {
+            return null;
+        }
+        var orderItem = new OrderItem
+        {
+            OrderId = orderId,
+            ProductVariantId = item.ProductVariantId,
+            Quantity = item.Quantity,
+            UnitPrice = item.UnitPrice
+        };
+        order.Items.Add(orderItem);
+        await _orderRepository.UpdateAsync(order);
+        return order;
+    }
+
+    public async Task<Order?> RemoveOrderItemAsync(int orderId, int itemId)
+    {
+        var order = await _orderRepository.GetByIdAsync(orderId);
+        if (order is null)
+        {
+            return null;
+        }
+        var item = order.Items.FirstOrDefault(i => i.Id == itemId);
+        if (item is null)
+        {
+            return null;
+        }
+        order.Items.Remove(item);
+        await _orderRepository.UpdateAsync(order);
+        return order;
+    }
 }
