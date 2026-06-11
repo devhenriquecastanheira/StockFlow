@@ -1,6 +1,6 @@
 using StockFlow.Domain.Entities;
 
-namespace StockFlow.Domain.Interfaces;
+namespace StockFlow.Application.Suppliers;
 
 public interface ISupplierService
 {

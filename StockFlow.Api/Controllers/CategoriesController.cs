@@ -1,7 +1,7 @@
 ﻿using FluentValidation;
 using Microsoft.AspNetCore.Mvc;
+using StockFlow.Application.Categories;
 using StockFlow.Domain.Entities;
-using StockFlow.Domain.Interfaces;
 
 namespace StockFlow.Api.Controllers;
 

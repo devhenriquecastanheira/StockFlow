@@ -3,7 +3,6 @@ using Microsoft.AspNetCore.Mvc;
 using StockFlow.Application.Orders;
 using StockFlow.Domain.Entities;
 using StockFlow.Domain.Enums;
-using StockFlow.Domain.Interfaces;
 
 namespace StockFlow.Api.Controllers;
 

@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace StockFlow.Domain.Interfaces;
+namespace StockFlow.Application.Stock;
 
 public interface IStockService
 {
