@@ -14,4 +14,10 @@ public class OrderViewModel
 
     [Display(Name = "Status do pedido")]
     public OrderStatusViewModel Status { get; set; }
+
+    [Display(Name = "Data de criação")]
+    public DateTime CreatedAt { get; set; }
+
+    [Display(Name = "Itens do pedido")]
+    public List<OrderItemViewModel> Items { get; set; } = new List<OrderItemViewModel>();
 }

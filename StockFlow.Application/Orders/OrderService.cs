@@ -24,9 +24,28 @@ public class OrderService : IOrderService
         _orderValidator = orderValidator;
     }
 
-    public async Task<List<Order>> GetOrdersAsync()
+    public async Task<List<OrderDto>> GetOrdersAsync()
     {
-        return await _orderRepository.GetAllAsync();
+        var orders = await _orderRepository.GetAllAsync();
+
+        return orders.Select(order => new OrderDto
+        {
+            Id = order.Id,
+            CustomerName = order.CustomerName,
+            CustomerEmail = order.CustomerEmail,
+            CreatedAt = order.CreatedAt,
+            Status = order.Status,
+            Items = order.Items.Select(item => new OrderItemDto
+            {
+                Id = item.Id,
+                ProductVariantId = item.ProductVariantId,
+                ProductName = item.ProductVariant.Product.Name,
+                Size = item.ProductVariant.Size,
+                Color = item.ProductVariant.Color,
+                Quantity = item.Quantity,
+                UnitPrice = item.UnitPrice
+            }).ToList()
+        }).ToList();
     }
 
     public async Task<OrderDto?> GetOrderAsync(int id)

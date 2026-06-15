@@ -10,7 +10,7 @@ namespace StockFlow.Application.Orders;
 
 public interface IOrderService
 {
-    Task<List<Order>> GetOrdersAsync();
+    Task<List<OrderDto>> GetOrdersAsync();
     Task<OrderDto?> GetOrderAsync(int id);
     Task<Order> AddOrderAsync(Order order);
     Task<OrderDto?> UpdateOrderAsync(int id, Order order);

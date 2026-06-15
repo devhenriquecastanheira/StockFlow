@@ -18,7 +18,7 @@ public class OrdersController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<ActionResult<List<Order>>> GetAll()
+    public async Task<ActionResult<List<OrderDto>>> GetAll()
     {
         var orders = await _orderService.GetOrdersAsync();
         return Ok(orders);

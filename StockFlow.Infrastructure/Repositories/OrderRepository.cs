@@ -22,7 +22,9 @@ public class OrderRepository : IOrderRepository
     public async Task<List<Order>> GetAllAsync()
     {
         return await _context.Orders
-            .AsNoTracking()
+            .Include(order => order.Items)
+            .ThenInclude(item => item.ProductVariant)
+            .ThenInclude(variant => variant.Product)
             .ToListAsync();
     }
 
