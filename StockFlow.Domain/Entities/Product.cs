@@ -15,7 +15,7 @@ public class Product
     public decimal SalePrice { get; set; }
     public int CategoryId { get; set; }
     public Category? Category { get; set; }
-    public ICollection<ProductVariant> Variants { get; set; } = [];
-    public ICollection<ProductImage> Images { get; set; } = [];
-    public ICollection<ProductTag> ProductTags { get; set; } = [];
+    public ICollection<ProductVariant> Variants { get; set; } = new List<ProductVariant>();
+    public ICollection<ProductImage> Images { get; set; } = new List<ProductImage>();
+    public ICollection<ProductTag> ProductTags { get; set; } = new List<ProductTag>();
 }

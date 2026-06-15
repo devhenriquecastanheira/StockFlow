@@ -29,9 +29,33 @@ public class OrderService : IOrderService
         return await _orderRepository.GetAllAsync();
     }
 
-    public async Task<Order?> GetOrderAsync(int id)
+    public async Task<OrderDto?> GetOrderAsync(int id)
     {
-        return await _orderRepository.GetByIdAsync(id);
+        var order = await _orderRepository.GetByIdAsync(id);
+
+        if (order == null)
+        {
+            return null;
+        }
+        
+        return new OrderDto
+        {
+            Id = order.Id,
+            CustomerName = order.CustomerName,
+            CustomerEmail = order.CustomerEmail,
+            CreatedAt = order.CreatedAt,
+            Status = order.Status,
+            Items = order.Items.Select(item => new OrderItemDto
+            {
+                Id = item.Id,
+                ProductVariantId = item.ProductVariantId,
+                ProductName = item.ProductVariant.Product.Name,
+                Size = item.ProductVariant.Size,
+                Color = item.ProductVariant.Color,
+                Quantity = item.Quantity,
+                UnitPrice = item.UnitPrice
+            }).ToList()
+        };
     }
 
     public async Task<Order> AddOrderAsync(Order order)
@@ -46,7 +70,7 @@ public class OrderService : IOrderService
         return order;
     }
 
-    public async Task<Order?> UpdateOrderAsync(int id, Order order)
+    public async Task<OrderDto?> UpdateOrderAsync(int id, Order order)
     {
         await _orderValidator.ValidateAndThrowAsync(order);
         var existingOrder = await _orderRepository.GetByIdAsync(id);
@@ -62,7 +86,24 @@ public class OrderService : IOrderService
 
         await _orderRepository.UpdateAsync(existingOrder);
 
-        return existingOrder;
+        return new OrderDto
+        {
+            Id = existingOrder.Id,
+            CustomerName = existingOrder.CustomerName,
+            CustomerEmail = existingOrder.CustomerEmail,
+            CreatedAt = existingOrder.CreatedAt,
+            Status = existingOrder.Status,
+            Items = existingOrder.Items.Select(item => new OrderItemDto
+            {
+                Id = item.Id,
+                ProductVariantId = item.ProductVariantId,
+                ProductName = item.ProductVariant.Product.Name,
+                Size = item.ProductVariant.Size,
+                Color = item.ProductVariant.Color,
+                Quantity = item.Quantity,
+                UnitPrice = item.UnitPrice
+            }).ToList()
+        };
     }
 
     public async Task<bool> DeleteOrderAsync(int id)
@@ -79,7 +120,7 @@ public class OrderService : IOrderService
         return true;
     }
 
-    public async Task<Order?> ChangeOrderStatusAsync(int id, OrderStatus newStatus)
+    public async Task<OrderDto?> ChangeOrderStatusAsync(int id, OrderStatus newStatus)
     {
         var order = await _orderRepository.GetByIdAsync(id);
         if (order is null)
@@ -88,10 +129,27 @@ public class OrderService : IOrderService
         }
         order.Status = newStatus;
         await _orderRepository.UpdateAsync(order);
-        return order;
+        return new OrderDto
+        {
+            Id = order.Id,
+            CustomerName = order.CustomerName,
+            CustomerEmail = order.CustomerEmail,
+            CreatedAt = order.CreatedAt,
+            Status = order.Status,
+            Items = order.Items.Select(item => new OrderItemDto
+            {
+                Id = item.Id,
+                ProductVariantId = item.ProductVariantId,
+                ProductName = item.ProductVariant.Product.Name,
+                Size = item.ProductVariant.Size,
+                Color = item.ProductVariant.Color,
+                Quantity = item.Quantity,
+                UnitPrice = item.UnitPrice
+            }).ToList()
+        };
     }
 
-    public async Task<Order?> AddOrderItemAsync(int orderId, CreateOrderItemDto item)
+    public async Task<OrderDto?> AddOrderItemAsync(int orderId, CreateOrderItemDto item)
     {
         var order = await _orderRepository.GetByIdAsync(orderId);
         if (order is null)
@@ -107,7 +165,32 @@ public class OrderService : IOrderService
         };
         order.Items.Add(orderItem);
         await _orderRepository.UpdateAsync(order);
-        return order;
+
+        var updatedOrder = await _orderRepository.GetByIdAsync(orderId);
+
+        if (updatedOrder is null)
+        {
+            return null;
+        }
+
+        return new OrderDto
+        {
+            Id = updatedOrder.Id,
+            CustomerName = updatedOrder.CustomerName,
+            CustomerEmail = updatedOrder.CustomerEmail,
+            CreatedAt = updatedOrder.CreatedAt,
+            Status = updatedOrder.Status,
+            Items = updatedOrder.Items.Select(item => new OrderItemDto
+            {
+                Id = item.Id,
+                ProductVariantId = item.ProductVariantId,
+                ProductName = item.ProductVariant.Product.Name,
+                Size = item.ProductVariant.Size,
+                Color = item.ProductVariant.Color,
+                Quantity = item.Quantity,
+                UnitPrice = item.UnitPrice
+            }).ToList()
+        };
     }
 
     public async Task<Order?> RemoveOrderItemAsync(int orderId, int itemId)

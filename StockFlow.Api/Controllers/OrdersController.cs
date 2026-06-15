@@ -25,7 +25,7 @@ public class OrdersController : ControllerBase
     }
 
     [HttpGet("{id}")]
-    public async Task<ActionResult<Order>> GetById(int id)
+    public async Task<ActionResult<OrderDto>> GetById(int id)
     {
         var order = await _orderService.GetOrderAsync(id);
         if (order == null)
@@ -43,7 +43,7 @@ public class OrdersController : ControllerBase
     }
 
     [HttpPut("{id}")]
-    public async Task<ActionResult<Order>> Update(int id, Order order)
+    public async Task<ActionResult<OrderDto>> Update(int id, Order order)
     {
         var updatedOrder = await _orderService.UpdateOrderAsync(id, order);
         if (updatedOrder == null)
@@ -65,7 +65,7 @@ public class OrdersController : ControllerBase
     }
 
     [HttpPatch("{id}/status")]
-    public async Task<ActionResult<Order>> ChangeStatus(int id, OrderStatus newStatus)
+    public async Task<ActionResult<OrderDto>> ChangeStatus(int id, OrderStatus newStatus)
     {
         var updatedOrder = await _orderService.ChangeOrderStatusAsync(id, newStatus);
         if (updatedOrder == null)
@@ -76,7 +76,7 @@ public class OrdersController : ControllerBase
     }
 
     [HttpPost("{orderId}/items")]
-    public async Task<ActionResult<Order>> AddItem(int orderId, CreateOrderItemDto item)
+    public async Task<ActionResult<OrderDto>> AddItem(int orderId, CreateOrderItemDto item)
     {
         var updatedOrder = await _orderService.AddOrderItemAsync(orderId, item);
         if (updatedOrder == null)
