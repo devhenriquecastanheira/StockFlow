@@ -20,4 +20,6 @@ public class OrderViewModel
 
     [Display(Name = "Itens do pedido")]
     public List<OrderItemViewModel> Items { get; set; } = new List<OrderItemViewModel>();
+
+    public decimal Total => Items.Sum(item => item.SubTotal);
 }

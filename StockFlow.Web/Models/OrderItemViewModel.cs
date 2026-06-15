@@ -23,4 +23,6 @@ public class OrderItemViewModel
 
     [Display(Name = "Preço unitário")]
     public decimal UnitPrice { get; set; }
+
+    public decimal SubTotal => Quantity * UnitPrice;
 }

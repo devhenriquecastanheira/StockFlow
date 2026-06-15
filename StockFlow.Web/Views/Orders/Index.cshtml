@@ -21,6 +21,9 @@ else
             <tr>
                 <th>Nome do Cliente</th>
                 <th>Email do Cliente</th>
+                <th>Status</th>
+                <th>Data de Criação</th>
+                <th>Total</th>
                 <th></th>
             </tr>
         </thead>
@@ -30,6 +33,9 @@ else
                 <tr>
                     <td class="fw-medium">@order.CustomerName</td>
                     <td class="text-secondary">@(string.IsNullOrWhiteSpace(order.CustomerEmail) ? "-" : order.CustomerEmail)</td>
+                    <td class="text-secondary">@order.Status</td>
+                    <td class="text-secondary">@order.CreatedAt.ToString("dd/MM/yyyy")</td>
+                    <td class="text-end fw-bold">R$ @order.Total.ToString("F2")</td>
                     <td>
                         <a asp-action="Edit" asp-route-id="@order.Id">Editar</a> |
                         <a asp-action="Details" asp-route-id="@order.Id">Detalhes</a> |
