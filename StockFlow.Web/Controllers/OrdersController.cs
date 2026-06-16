@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using StockFlow.Web.Models;
 using System.Net;
 
@@ -150,5 +151,55 @@ public class OrdersController : Controller
         }
 
         return View(order);
+    }
+
+    public async Task<IActionResult> AddItem(int? orderId)
+    {
+        if (orderId == null)
+        {
+            return NotFound();
+        }
+
+        var response = await _httpClient.GetAsync($"api/orders/{orderId}");
+
+        if (response.StatusCode == HttpStatusCode.NotFound)
+        {
+            return NotFound();
+        }
+
+        response.EnsureSuccessStatusCode();
+
+        var order = await response.Content.ReadFromJsonAsync<OrderItemViewModel>();
+
+        await FillVariantOptionsAsync(order);
+
+        return View(order);
+    }
+
+    [HttpPost]
+    public async Task<IActionResult> AddItem(int orderId, [Bind("ProductVariantId,Quantity,UnitPrice")] OrderItemViewModel orderItem)
+    {
+        var response = await _httpClient.PostAsJsonAsync($"api/orders/{orderId}/items", orderItem);
+
+        if (response.IsSuccessStatusCode)
+        {
+            return RedirectToAction(nameof(Details), new { id = orderId });
+        }
+
+        await FillVariantOptionsAsync(orderItem);
+
+        return View(orderItem);
+    }
+
+    private async Task FillVariantOptionsAsync(OrderItemViewModel orderItem)
+    {
+        var variants = await _httpClient.GetFromJsonAsync<List<ProductVariantViewModel>>("api/products/variants")
+            ?? [];
+
+        orderItem.VariantOptions = variants.Select(v => new SelectListItem
+        {
+            Value = v.Id.ToString(),
+            Text = $"{v.ProductName} - {v.Size} - {v.Color}"
+        }).ToList();
     }
 }

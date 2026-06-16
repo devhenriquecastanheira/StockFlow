@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using Microsoft.AspNetCore.Mvc.Rendering;
+using System.ComponentModel.DataAnnotations;
 
 namespace StockFlow.Web.Models;
 
@@ -25,4 +26,6 @@ public class OrderItemViewModel
     public decimal UnitPrice { get; set; }
 
     public decimal SubTotal => Quantity * UnitPrice;
+
+    public List<SelectListItem> VariantOptions { get; set; } = [];
 }

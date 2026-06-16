@@ -1,3 +1,6 @@
+using Microsoft.AspNetCore.Localization;
+using System.Globalization;
+
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllersWithViews();
@@ -8,6 +11,15 @@ builder.Services.AddHttpClient("StockFlowApi", client =>
 });
 
 var app = builder.Build();
+
+var culture = new CultureInfo("pt-BR");
+
+app.UseRequestLocalization(new RequestLocalizationOptions
+{
+    DefaultRequestCulture = new RequestCulture(culture),
+    SupportedCultures = [culture],
+    SupportedUICultures = [culture]
+});
 
 if (!app.Environment.IsDevelopment())
 {
