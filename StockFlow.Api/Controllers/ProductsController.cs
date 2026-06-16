@@ -89,7 +89,7 @@ public class ProductsController : ControllerBase
     }
 
     [HttpGet("variants")]
-    public async Task<ActionResult<List<ProductVariant>>> GetVariants()
+    public async Task<ActionResult<List<ProductVariantDto>>> GetVariants()
     {
         var variants = await _productService.GetVariantsAsync();
 
@@ -97,7 +97,7 @@ public class ProductsController : ControllerBase
     }
 
     [HttpGet("variants/{id:int}")]
-    public async Task<ActionResult<ProductVariant>> GetVariantById(int id)
+    public async Task<ActionResult<ProductVariantDto>> GetVariantById(int id)
     {
         var variant = await _productService.GetVariantByIdAsync(id);
 

@@ -71,13 +71,38 @@ public class ProductService : IProductService
         return true;
     }
 
-    public async Task<List<ProductVariant>> GetVariantsAsync()
+    public async Task<List<ProductVariantDto>> GetVariantsAsync()
     {
-        return await _productRepository.GetVariantsAsync();
+        var variants = await _productRepository.GetVariantsAsync();
+        return variants.Select(v => new ProductVariantDto
+        {
+            Id = v.Id,
+            ProductId = v.ProductId,
+            ProductName = v.Product.Name,
+            Size = v.Size,
+            Color = v.Color,
+            Sku = v.Sku,
+            MinimumStockLevel = v.MinimumStockLevel
+        }).ToList();
     }
 
-    public async Task<ProductVariant?> GetVariantByIdAsync(int id)
+    public async Task<ProductVariantDto?> GetVariantByIdAsync(int id)
     {
-        return await _productRepository.GetVariantByIdAsync(id);
+        var variant = await _productRepository.GetVariantByIdAsync(id);
+        if (variant is null)
+        {
+            return null;
+        }
+
+        return new ProductVariantDto
+        {
+            Id = variant.Id,
+            ProductId = variant.ProductId,
+            ProductName = variant.Product.Name,
+            Size = variant.Size,
+            Color = variant.Color,
+            Sku = variant.Sku,
+            MinimumStockLevel = variant.MinimumStockLevel
+        };
     }
 }
