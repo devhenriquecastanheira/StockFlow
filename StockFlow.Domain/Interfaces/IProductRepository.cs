@@ -9,4 +9,6 @@ public interface IProductRepository
     Task AddAsync(Product product);
     Task UpdateAsync(Product product);
     Task DeleteAsync(Product product);
+    Task<List<ProductVariant>> GetVariantsAsync();
+    Task<ProductVariant?> GetVariantByIdAsync(int id);
 }

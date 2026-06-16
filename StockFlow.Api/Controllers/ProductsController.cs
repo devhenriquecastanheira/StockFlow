@@ -87,4 +87,25 @@ public class ProductsController : ControllerBase
 
         return NoContent();
     }
+
+    [HttpGet("variants")]
+    public async Task<ActionResult<List<ProductVariant>>> GetVariants()
+    {
+        var variants = await _productService.GetVariantsAsync();
+
+        return Ok(variants);
+    }
+
+    [HttpGet("variants/{id:int}")]
+    public async Task<ActionResult<ProductVariant>> GetVariantById(int id)
+    {
+        var variant = await _productService.GetVariantByIdAsync(id);
+
+        if (variant is null)
+        {
+            return NotFound();
+        }
+
+        return Ok(variant);
+    }
 }

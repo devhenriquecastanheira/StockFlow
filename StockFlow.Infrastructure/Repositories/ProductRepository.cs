@@ -49,4 +49,19 @@ public class ProductRepository : IProductRepository
         _context.Products.Update(product);
         await _context.SaveChangesAsync();
     }
+
+    public async Task<List<ProductVariant>> GetVariantsAsync()
+    {
+        return await _context.ProductVariants
+            .Include(variant => variant.Product)
+            .AsNoTracking()
+            .ToListAsync();
+    }
+
+    public async Task<ProductVariant?> GetVariantByIdAsync(int id)
+    {
+        return await _context.ProductVariants
+            .Include(variant => variant.Product)
+            .FirstOrDefaultAsync(variant => variant.Id == id);
+    }
 }

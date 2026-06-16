@@ -70,4 +70,14 @@ public class ProductService : IProductService
 
         return true;
     }
+
+    public async Task<List<ProductVariant>> GetVariantsAsync()
+    {
+        return await _productRepository.GetVariantsAsync();
+    }
+
+    public async Task<ProductVariant?> GetVariantByIdAsync(int id)
+    {
+        return await _productRepository.GetVariantByIdAsync(id);
+    }
 }

@@ -9,4 +9,6 @@ public interface IProductService
     Task<Product> CreateAsync(Product product);
     Task<Product?> UpdateAsync(int id, Product product);
     Task<bool> DeleteAsync(int id);
+    Task<List<ProductVariant>> GetVariantsAsync();
+    Task<ProductVariant?> GetVariantByIdAsync(int id);
 }
