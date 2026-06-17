@@ -202,4 +202,39 @@ public class OrdersController : Controller
             Text = $"{v.ProductName} - {v.Size} - {v.Color}"
         }).ToList();
     }
+
+    public async Task<IActionResult> ChangeStatusAsync(int? orderId)
+    {
+        if (orderId == null)
+        {
+            return NotFound();
+        }
+
+        var response = await _httpClient.GetAsync($"api/orders/{orderId}");
+
+        if (response.StatusCode == HttpStatusCode.NotFound)
+        {
+            return NotFound();
+        }
+
+        response.EnsureSuccessStatusCode();
+
+        var order = await response.Content.ReadFromJsonAsync<OrderViewModel>();
+
+        return View(order);
+    }
+
+    [HttpPost]
+    public async Task<IActionResult> ChangeStatusAsync(int id, [Bind("Status")] OrderViewModel order)
+    {
+        var newStatus = order.Status;
+
+        var response = await _httpClient.PatchAsJsonAsync($"api/orders/{id}/status", newStatus);
+
+        if (response.IsSuccessStatusCode)
+        {
+            return RedirectToAction(nameof(Details), new { id = id });
+        }
+        return View(order);
+    }
 }

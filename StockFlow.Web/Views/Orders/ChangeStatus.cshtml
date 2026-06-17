@@ -1,0 +1,50 @@
+﻿@model OrderViewModel
+
+@{
+    ViewData["Title"] = "Alterar status do pedido";
+}
+
+<h1>Alterar status do pedido</h1>
+
+<div>
+    <h4>Pedido</h4>
+    <hr />
+    <dl class="row">
+        <dt class="col-sm-2">Nome do Cliente</dt>
+        <dd class="col-sm-10">@Model.CustomerName</dd>
+        <dt class="col-sm-2">Email do Cliente</dt>
+        <dd class="col-sm-10">@Model.CustomerEmail</dd>
+        <dt class="col-sm-2">Status</dt>
+        <dd class="col-sm-10">@GetMovementTypeName(Model.Status)</dd>
+    </dl>
+
+    <div class="form-group mb-3">
+        <form asp-action="ChangeStatus" method="post">
+            <input type="hidden" asp-for="Id" />
+
+            <label asp-for="Status" class="control-label"></label>
+            <select asp-for="Status"
+                    asp-items="Html.GetEnumSelectList<OrderStatusViewModel>()"
+                    class="form-select"></select>
+            <span asp-validation-for="Status" class="text-danger"></span>
+
+            <div class="form-group">
+                <input type="submit" value="Salvar" class="btn btn-primary" />
+            </div>
+        </form>
+    </div>
+</div>
+
+@functions {
+    private static string GetMovementTypeName(OrderStatusViewModel type)
+    {
+        return type switch
+        {
+            OrderStatusViewModel.Pending => "Pendente",
+            OrderStatusViewModel.Confirmed => "Confirmado",
+            OrderStatusViewModel.Shipped => "Enviado",
+            OrderStatusViewModel.Delivered => "Entregue",
+            _ => type.ToString()
+        };
+    }
+}

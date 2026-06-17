@@ -65,7 +65,7 @@ public class OrdersController : ControllerBase
     }
 
     [HttpPatch("{id}/status")]
-    public async Task<ActionResult<OrderDto>> ChangeStatus(int id, OrderStatus newStatus)
+    public async Task<ActionResult<OrderDto>> ChangeStatus(int id, [FromBody] OrderStatus newStatus)
     {
         var updatedOrder = await _orderService.ChangeOrderStatusAsync(id, newStatus);
         if (updatedOrder == null)
