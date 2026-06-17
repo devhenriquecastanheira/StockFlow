@@ -86,7 +86,7 @@ public class OrdersController : ControllerBase
         return Ok(updatedOrder);
     }
 
-    [HttpDelete("{orderId}/items")]
+    [HttpDelete("{orderId}/items/{itemId}")]
     public async Task<ActionResult> RemoveItem(int orderId, int itemId)
     {
         var removedItem = await _orderService.RemoveOrderItemAsync(orderId, itemId);

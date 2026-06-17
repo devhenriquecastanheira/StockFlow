@@ -237,4 +237,42 @@ public class OrdersController : Controller
         }
         return View(order);
     }
+
+    public async Task<IActionResult> RemoveItem(int? orderId, int? itemId)
+    {
+        if (orderId == null || itemId == null)
+        {
+            return NotFound();
+        }
+
+        var response = await _httpClient.GetAsync($"api/orders/{orderId}");
+
+        if (response.StatusCode == HttpStatusCode.NotFound)
+        {
+            return NotFound();
+        }
+
+        response.EnsureSuccessStatusCode();
+
+        var order = await response.Content.ReadFromJsonAsync<OrderViewModel>();
+
+        var item = order?.Items.FirstOrDefault(i => i.Id == itemId.Value);
+
+        if (item is null)
+        {
+            return NotFound();
+        }
+
+        order.Items = new List<OrderItemViewModel> { item };
+
+        return View(order);
+    }
+
+    [HttpPost, ActionName("RemoveItem")]
+    public async Task<IActionResult> RemoveItemConfirmed(int orderId, int itemId)
+    {
+        var response = await _httpClient.DeleteAsync($"api/orders/{orderId}/items/{itemId}");
+
+        return RedirectToAction(nameof(Details), new { id = orderId });
+    }
 }
