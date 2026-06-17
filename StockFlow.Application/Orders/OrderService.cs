@@ -101,7 +101,6 @@ public class OrderService : IOrderService
 
         existingOrder.CustomerName = order.CustomerName;
         existingOrder.CustomerEmail = order.CustomerEmail;
-        existingOrder.Status = order.Status;
 
         await _orderRepository.UpdateAsync(existingOrder);
 

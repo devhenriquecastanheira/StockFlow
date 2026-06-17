@@ -126,7 +126,7 @@ public class OrdersController : Controller
 
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Edit(int id, [Bind("Id,CustomerName,CustomerEmail,Status")] OrderViewModel order)
+    public async Task<IActionResult> Edit(int id, [Bind("Id,CustomerName,CustomerEmail")] OrderViewModel order)
     {
         if (id != order.Id)
         {

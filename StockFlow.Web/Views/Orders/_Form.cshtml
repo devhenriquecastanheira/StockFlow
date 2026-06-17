@@ -14,13 +14,3 @@
     <span asp-validation-for="CustomerEmail" class="text-danger"></span>
 </div>
 
-@if (ViewData["IsEdit"] as bool? == true)
-{
-    <div class="form-group mb-3">
-        <label asp-for="Status" class="control-label"></label>
-        <select asp-for="Status"
-                asp-items="Html.GetEnumSelectList<OrderStatusViewModel>()"
-                class="form-select"></select>
-        <span asp-validation-for="Status" class="text-danger"></span>
-    </div>
-}
