@@ -63,4 +63,18 @@ public class StockRepository : IStockRepository
         await _context.StockMovements.AddAsync(movement);
         await _context.SaveChangesAsync();
     }
+
+    public async Task<List<StockItem>> GetStockItemsByProductVariantAsync(int productVariantId)
+    {
+        return await _context.StockItems
+            .Where(item => item.ProductVariantId == productVariantId)
+            .OrderByDescending(item => item.Quantity)
+            .ToListAsync();
+    }
+
+    public async Task RegisterMovementsAsync(List<StockMovement> movements)
+    {
+        await _context.StockMovements.AddRangeAsync(movements);
+        await _context.SaveChangesAsync();
+    }
 }

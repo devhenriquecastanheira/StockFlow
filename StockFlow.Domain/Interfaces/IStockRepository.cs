@@ -13,4 +13,6 @@ public interface IStockRepository
     Task<StockItem?> GetStockItemAsync(int productVariantId, int warehouseId);
     Task<List<StockMovement>> GetMovementsAsync(int productVariantId);
     Task RegisterMovementAsync(StockItem stockItem, StockMovement movement);
+    Task<List<StockItem>> GetStockItemsByProductVariantAsync(int productVariantId);
+    Task RegisterMovementsAsync(List<StockMovement> movements);
 }

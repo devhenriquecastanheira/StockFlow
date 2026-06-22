@@ -70,4 +70,61 @@ public class StockService : IStockService
 
         return movement;
     }
+
+    public async Task<List<StockMovement>> RegisterExitAcrossWarehousesAsync(int productVariantId, int quantity, string reason)
+    {
+        if (productVariantId <= 0)
+        {
+            throw new InvalidOperationException("Produto inválido.");
+        }
+
+        if (quantity <= 0)
+        {
+            throw new InvalidOperationException("Quantidade deve ser maior que zero.");
+        }
+
+        var stockItems = await _stockRepository.GetStockItemsByProductVariantAsync(productVariantId);
+
+        var availableItems = stockItems
+            .Where(item => item.Quantity > 0)
+            .OrderByDescending(item => item.Quantity)
+            .ToList();
+
+        var totalAvailable = availableItems.Sum(item => item.Quantity);
+
+        if (totalAvailable < quantity)
+        {
+            throw new InvalidOperationException("Estoque total insuficiente.");
+        }
+
+        var remainingQuantity = quantity;
+        var movements = new List<StockMovement>();
+
+        foreach (var stockItem in availableItems)
+        {
+            if (remainingQuantity <= 0)
+            {
+                break;
+            }
+
+            var quantityToRemove = Math.Min(stockItem.Quantity, remainingQuantity);
+
+            stockItem.Quantity -= quantityToRemove;
+            remainingQuantity -= quantityToRemove;
+
+            movements.Add(new StockMovement
+            {
+                ProductVariantId = productVariantId,
+                WarehouseId = stockItem.WarehouseId,
+                Type = StockMovementType.Exit,
+                Quantity = quantityToRemove,
+                Reason = reason,
+                CreatedAt = DateTime.UtcNow
+            });
+        }
+
+        await _stockRepository.RegisterMovementsAsync(movements);
+
+        return movements;
+    }
 }
