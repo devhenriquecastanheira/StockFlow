@@ -18,4 +18,5 @@ public interface IOrderService
     Task<OrderDto?> ChangeOrderStatusAsync(int id, OrderStatus newStatus);
     Task<OrderDto?> AddOrderItemAsync(int orderId, CreateOrderItemDto item);
     Task<Order?> RemoveOrderItemAsync(int orderId, int itemId);
+    Task<OrderDto?> ConfirmOrderAsync(int orderId);
 }

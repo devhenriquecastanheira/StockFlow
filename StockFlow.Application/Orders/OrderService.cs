@@ -1,13 +1,8 @@
 ﻿using FluentValidation;
-using StockFlow.Application.Suppliers;
+using StockFlow.Application.Stock;
 using StockFlow.Domain.Entities;
 using StockFlow.Domain.Enums;
 using StockFlow.Domain.Interfaces;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace StockFlow.Application.Orders;
 
@@ -15,13 +10,16 @@ public class OrderService : IOrderService
 {
     private readonly IOrderRepository _orderRepository;
     private readonly IValidator<Order> _orderValidator;
+    private readonly IStockService _stockService;
 
     public OrderService(
         IOrderRepository orderRepository,
-        IValidator<Order> orderValidator)
+        IValidator<Order> orderValidator,
+        IStockService stockService)
     {
         _orderRepository = orderRepository;
         _orderValidator = orderValidator;
+        _stockService = stockService;
     }
 
     public async Task<List<OrderDto>> GetOrdersAsync()
@@ -56,7 +54,7 @@ public class OrderService : IOrderService
         {
             return null;
         }
-        
+
         return new OrderDto
         {
             Id = order.Id,
@@ -226,5 +224,54 @@ public class OrderService : IOrderService
         order.Items.Remove(item);
         await _orderRepository.UpdateAsync(order);
         return order;
+    }
+
+    public async Task<OrderDto?> ConfirmOrderAsync(int orderId)
+    {
+        var order = await _orderRepository.GetByIdAsync(orderId);
+        if (order is null)
+        {
+            return null;
+        }
+
+        if (order.Status != OrderStatus.Pending)
+        {
+            throw new InvalidOperationException("Apenas pedidos pendentes podem ser confirmados.");
+        }
+
+        if (order.Items.Count <= 0)
+        {
+            throw new InvalidOperationException("O pedido deve conter pelo menos um item para ser confirmado.");
+        }
+
+        foreach (var item in order.Items)
+        {
+            await _stockService.RegisterExitAcrossWarehousesAsync(
+            item.ProductVariantId,
+            item.Quantity,
+            $"Pedido #{order.Id} foi confirmado");
+        }
+
+        order.Status = OrderStatus.Confirmed;
+
+        await _orderRepository.UpdateAsync(order);
+        return new OrderDto
+        {
+            Id = order.Id,
+            CustomerName = order.CustomerName,
+            CustomerEmail = order.CustomerEmail,
+            CreatedAt = order.CreatedAt,
+            Status = order.Status,
+            Items = order.Items.Select(item => new OrderItemDto
+            {
+                Id = item.Id,
+                ProductVariantId = item.ProductVariantId,
+                ProductName = item.ProductVariant.Product.Name,
+                Size = item.ProductVariant.Size,
+                Color = item.ProductVariant.Color,
+                Quantity = item.Quantity,
+                UnitPrice = item.UnitPrice
+            }).ToList()
+        };
     }
 }

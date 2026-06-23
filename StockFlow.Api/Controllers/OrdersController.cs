@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Http;
+using FluentValidation;
 using Microsoft.AspNetCore.Mvc;
 using StockFlow.Application.Orders;
 using StockFlow.Domain.Entities;
@@ -95,5 +96,29 @@ public class OrdersController : ControllerBase
             return NotFound();
         }
         return NoContent();
+    }
+
+    [HttpPost("{orderId}/confirm")]
+    public async Task<ActionResult<OrderDto>> ConfirmOrder(int orderId)
+    {
+        try
+        {
+            var confirmedOrder = await _orderService.ConfirmOrderAsync(orderId);
+
+            if (confirmedOrder == null)
+            {
+                return NotFound();
+            }
+
+            return Ok(confirmedOrder);
+        }
+        catch (ValidationException ex)
+        {
+            return BadRequest(ex.Errors);
+        }
+        catch (InvalidOperationException ex)
+        {
+            return BadRequest(ex.Message);
+        }
     }
 }
