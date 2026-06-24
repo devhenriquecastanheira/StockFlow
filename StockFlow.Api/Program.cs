@@ -5,6 +5,7 @@ using StockFlow.Application.Orders;
 using StockFlow.Application.Products;
 using StockFlow.Application.Stock;
 using StockFlow.Application.Suppliers;
+using StockFlow.Application.Warehouses;
 using StockFlow.Domain.Entities;
 using StockFlow.Domain.Interfaces;
 using StockFlow.Infrastructure.Data;
@@ -39,6 +40,9 @@ builder.Services.AddScoped<IValidator<StockMovement>, StockMovementValidator>();
 builder.Services.AddScoped<IOrderRepository, OrderRepository>();
 builder.Services.AddScoped<IOrderService, OrderService>();
 builder.Services.AddScoped<IValidator<Order>, OrderValidator>();
+
+builder.Services.AddScoped<IWarehouseRepository, WarehouseRepository>();
+builder.Services.AddScoped<IWarehouseService, WarehouseService>();
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
