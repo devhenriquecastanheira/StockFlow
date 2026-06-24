@@ -275,4 +275,17 @@ public class OrdersController : Controller
 
         return RedirectToAction(nameof(Details), new { id = orderId });
     }
+
+    [HttpPost, ActionName("ConfirmOrder")]
+    public async Task<IActionResult> ConfirmOrder(int orderId)
+    {
+        var response = await _httpClient.PostAsync($"api/orders/{orderId}/confirm", null);
+
+        if (response.IsSuccessStatusCode)
+        {
+            return RedirectToAction(nameof(Details), new { id = orderId });
+        }
+
+        return RedirectToAction(nameof(Details), new { id = orderId });
+    }
 }

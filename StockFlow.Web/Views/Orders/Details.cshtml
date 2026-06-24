@@ -22,6 +22,13 @@
         <dd class="col-sm-10 fw-bold">R$ @Model.Total.ToString("F2")</dd>
     </dl>
 
+    @if (Model.Status == OrderStatusViewModel.Pending)
+    {
+        <form asp-action="ConfirmOrder" asp-route-orderId="@Model.Id" method="post" style="display:inline">
+            <button type="submit" class="btn btn-link">Confirmar pedido</button>
+        </form>
+    }
+
     @if (Model.Items.Count == 0)
     {
         <p>Nenhum item adicionado.</p>
@@ -61,7 +68,7 @@
 </div>
 <div>
     <a asp-action="AddItem" asp-route-orderId="@Model.Id">Adicionar item</a> |
-    <a asp-action="ChangeStatus" asp-route-orderId="@Model.Id">Alterar status</a> |
+    @* <a asp-action="ChangeStatus" asp-route-orderId="@Model.Id">Alterar status</a> | *@
     <a asp-action="Edit" asp-route-id="@Model.Id">Editar</a> |
     <a asp-action="Index">Voltar</a>
 </div>
