@@ -37,6 +37,7 @@ else
                     <td>
                         <a asp-action="Edit" asp-route-id="@product.Id">Editar</a> |
                         <a asp-action="Details" asp-route-id="@product.Id">Detalhes</a> |
+                        <a asp-controller="ProductVariants" asp-action="Index" asp-route-productId="@product.Id">Variantes</a> |
                         <a asp-action="Delete" asp-route-id="@product.Id">Excluir</a>
                     </td>
                 </tr>

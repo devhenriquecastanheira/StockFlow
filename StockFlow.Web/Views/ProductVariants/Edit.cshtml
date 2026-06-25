@@ -1,0 +1,30 @@
+﻿@model ProductVariantViewModel
+
+@{
+    ViewData["Title"] = "Editar variante";
+}
+
+<h1>Editar variante</h1>
+
+<h4>@Model.ProductName</h4>
+<hr />
+
+<div class="row">
+    <div class="col-md-4">
+        <form asp-action="Edit" method="post">
+            <partial name="_Form" model="Model" />
+
+            <div class="form-group">
+                <input type="submit" value="Salvar" class="btn btn-primary" />
+            </div>
+        </form>
+    </div>
+</div>
+
+<div>
+    <a asp-action="Index" asp-route-productId="@Model.ProductId">Voltar</a>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

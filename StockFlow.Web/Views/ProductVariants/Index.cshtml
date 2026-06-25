@@ -1,0 +1,54 @@
+﻿@model ProductViewModel
+
+@{
+    ViewData["Title"] = "Variantes";
+}
+
+<h1>Variantes</h1>
+
+<div>
+    <h4>@Model.Name</h4>
+    <hr />
+
+    <p>
+        <a asp-action="Create" asp-route-productId="@Model.Id">Nova variante</a>
+    </p>
+
+    @if (Model.Variants.Count == 0)
+    {
+        <p>Nenhuma variante cadastrada.</p>
+    }
+    else
+    {
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>SKU</th>
+                    <th>Tamanho</th>
+                    <th>Cor</th>
+                    <th>Estoque mínimo</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var variant in Model.Variants)
+                {
+                    <tr>
+                        <td>@variant.Sku</td>
+                        <td>@variant.Size</td>
+                        <td>@variant.Color</td>
+                        <td>@variant.MinimumStockLevel</td>
+                        <td>
+                            <a asp-action="Edit" asp-route-id="@variant.Id">Editar</a> |
+                            <a asp-action="Delete" asp-route-id="@variant.Id">Excluir</a>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+</div>
+
+<div>
+    <a asp-controller="Products" asp-action="Index">Voltar</a>
+</div>

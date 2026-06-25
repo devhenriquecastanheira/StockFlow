@@ -32,4 +32,7 @@ public class ProductViewModel
     public string CategoryName { get; set; } = string.Empty;
 
     public List<SelectListItem> CategoryOptions { get; set; } = [];
+
+    [Display(Name = "Variantes")]
+    public List<ProductVariantViewModel> Variants { get; set; } = [];
 }
