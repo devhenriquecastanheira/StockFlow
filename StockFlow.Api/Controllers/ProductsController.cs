@@ -108,4 +108,46 @@ public class ProductsController : ControllerBase
 
         return Ok(variant);
     }
+
+    [HttpGet("{productId:int}/variants")]
+    public async Task<ActionResult<List<ProductVariantDto>>> GetVariantsByProductId(int productId)
+    {
+        var variants = await _productService.GetVariantsByProductIdAsync(productId);
+
+        return Ok(variants);
+    }
+
+    [HttpPost("{productId:int}/variants")]
+    public async Task<ActionResult<ProductVariantDto>> CreateVariant(int productId, ProductVariantDto variant)
+    {
+        var createdVariant = await _productService.CreateVariantAsync(productId, variant);
+
+        return CreatedAtAction(nameof(GetVariantById), new { id = createdVariant.Id }, createdVariant);
+    }
+
+    [HttpPut("variants/{id:int}")]
+    public async Task<ActionResult<ProductVariantDto>> UpdateVariant(int id, ProductVariantDto variant)
+    {
+        var updatedVariant = await _productService.UpdateVariantAsync(id, variant);
+
+        if (updatedVariant is null)
+        {
+            return NotFound();
+        }
+
+        return Ok(updatedVariant);
+    }
+
+    [HttpDelete("variants/{id:int}")]
+    public async Task<IActionResult> DeleteVariant(int id)
+    {
+        var deleted = await _productService.DeleteVariantAsync(id);
+
+        if (!deleted)
+        {
+            return NotFound();
+        }
+
+        return NoContent();
+    }
 }

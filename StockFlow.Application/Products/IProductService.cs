@@ -11,4 +11,8 @@ public interface IProductService
     Task<bool> DeleteAsync(int id);
     Task<List<ProductVariantDto>> GetVariantsAsync();
     Task<ProductVariantDto?> GetVariantByIdAsync(int id);
+    Task<List<ProductVariantDto>> GetVariantsByProductIdAsync(int productId);
+    Task<ProductVariantDto> CreateVariantAsync(int productId, ProductVariantDto variant);
+    Task<ProductVariantDto> UpdateVariantAsync(int id, ProductVariantDto variant);
+    Task<bool> DeleteVariantAsync(int id);
 }

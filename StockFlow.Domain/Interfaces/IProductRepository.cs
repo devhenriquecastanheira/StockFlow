@@ -11,4 +11,8 @@ public interface IProductRepository
     Task DeleteAsync(Product product);
     Task<List<ProductVariant>> GetVariantsAsync();
     Task<ProductVariant?> GetVariantByIdAsync(int id);
+    Task<List<ProductVariant>> GetVariantsByProductIdAsync(int productId);
+    Task AddVariantAsync(ProductVariant variant);
+    Task UpdateVariantAsync(ProductVariant variant);
+    Task DeleteVariantAsync(ProductVariant variant);
 }

@@ -105,4 +105,66 @@ public class ProductService : IProductService
             MinimumStockLevel = variant.MinimumStockLevel
         };
     }
+
+    public async Task<List<ProductVariantDto>> GetVariantsByProductIdAsync(int productId)
+    {
+        var variants = await _productRepository.GetVariantsByProductIdAsync(productId);
+
+        return variants.Select(v => new ProductVariantDto
+        {
+            Id = v.Id,
+            ProductId = v.ProductId,
+            ProductName = v.Product.Name,
+            Size = v.Size,
+            Color = v.Color,
+            Sku = v.Sku,
+            MinimumStockLevel = v.MinimumStockLevel
+        }).ToList();
+    }
+
+    public async Task<ProductVariantDto> CreateVariantAsync(int productId, ProductVariantDto variant)
+    {
+        var product = await _productRepository.GetByIdAsync(productId);
+
+        variant.ProductId = productId;
+
+        await _productRepository.AddVariantAsync(new ProductVariant
+        {
+            ProductId = variant.ProductId,
+            Size = variant.Size,
+            Color = variant.Color,
+            Sku = variant.Sku,
+            MinimumStockLevel = variant.MinimumStockLevel
+        });
+
+        return variant;
+    }
+
+    public async Task<ProductVariantDto> UpdateVariantAsync(int id, ProductVariantDto variant)
+    {
+        var existingVariant = await _productRepository.GetVariantByIdAsync(id);
+
+        existingVariant.Size = variant.Size;
+        existingVariant.Color = variant.Color;
+        existingVariant.Sku = variant.Sku;
+        existingVariant.MinimumStockLevel = variant.MinimumStockLevel;
+
+        await _productRepository.UpdateVariantAsync(existingVariant);
+
+        return variant;
+    }
+
+    public async Task<bool> DeleteVariantAsync(int id)
+    {
+        var variant = await _productRepository.GetVariantByIdAsync(id);
+
+        if (variant is null)
+        {
+            return false;
+        }
+
+        await _productRepository.DeleteVariantAsync(variant);
+
+        return true;
+    }
 }

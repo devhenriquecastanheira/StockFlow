@@ -64,4 +64,31 @@ public class ProductRepository : IProductRepository
             .Include(variant => variant.Product)
             .FirstOrDefaultAsync(variant => variant.Id == id);
     }
+
+    public async Task<List<ProductVariant>> GetVariantsByProductIdAsync(int productId)
+    {
+        return await _context.ProductVariants
+            .Where(variant => variant.ProductId == productId)
+            .Include(variant => variant.Product)
+            .AsNoTracking()
+            .ToListAsync();
+    }
+
+    public async Task AddVariantAsync(ProductVariant variant)
+    {
+        await _context.ProductVariants.AddAsync(variant);
+        await _context.SaveChangesAsync();
+    }
+
+    public async Task UpdateVariantAsync(ProductVariant variant)
+    {
+        _context.ProductVariants.Update(variant);
+        await _context.SaveChangesAsync();
+    }
+
+    public async Task DeleteVariantAsync(ProductVariant variant)
+    {
+        _context.ProductVariants.Remove(variant);
+        await _context.SaveChangesAsync();
+    }
 }
