@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using StockFlow.Application.Categories;
 using StockFlow.Application.Orders;
 using StockFlow.Application.Products;
+using StockFlow.Application.PurchaseOrders;
 using StockFlow.Application.Stock;
 using StockFlow.Application.Suppliers;
 using StockFlow.Application.Warehouses;
@@ -43,6 +44,9 @@ builder.Services.AddScoped<IValidator<Order>, OrderValidator>();
 
 builder.Services.AddScoped<IWarehouseRepository, WarehouseRepository>();
 builder.Services.AddScoped<IWarehouseService, WarehouseService>();
+
+builder.Services.AddScoped<IPurchaseOrderRepository, PurchaseOrderRepository>();
+builder.Services.AddScoped<IPurchaseOrderService, PurchaseOrderService>();
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
