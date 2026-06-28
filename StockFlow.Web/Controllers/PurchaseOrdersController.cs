@@ -1,0 +1,124 @@
+﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
+using StockFlow.Web.Models;
+
+namespace StockFlow.Web.Controllers;
+
+public class PurchaseOrdersController : Controller
+{
+    private readonly HttpClient _httpClient;
+
+    public PurchaseOrdersController(IHttpClientFactory httpClientFactory)
+    {
+        _httpClient = httpClientFactory.CreateClient("StockFlowApi");
+    }
+
+    public async Task<IActionResult> Index()
+    {
+        var orders = await _httpClient.GetFromJsonAsync<List<PurchaseOrderViewModel>>("api/purchaseorders") ?? [];
+
+        var suppliers = await _httpClient.GetFromJsonAsync<List<SupplierViewModel>>("api/suppliers") ?? [];
+
+        foreach (var order in orders)
+        {
+            order.SupplierName = suppliers.FirstOrDefault(s => s.Id == order.SupplierId)?.Name ?? "";
+        }
+
+        return View(orders);
+    }
+
+    public async Task<IActionResult> Create()
+    {
+        var order = new PurchaseOrderViewModel();
+        await FillSupplierOptionsAsync(order);
+
+        return View(order);
+    }
+
+    [HttpPost]
+    public async Task<IActionResult> Create(PurchaseOrderViewModel order)
+    {
+        var response = await _httpClient.PostAsJsonAsync("api/purchaseorders", order);
+
+        return RedirectToAction(nameof(Index));
+    }
+
+    public async Task<IActionResult> Details(int id)
+    {
+        var order = await _httpClient.GetFromJsonAsync<PurchaseOrderViewModel>($"api/purchaseorders/{id}");
+
+        var suppliers = await _httpClient.GetFromJsonAsync<List<SupplierViewModel>>("api/suppliers") ?? [];
+
+        order.SupplierName = suppliers.FirstOrDefault(s => s.Id == order.SupplierId)?.Name ?? "";
+
+        if (order is null)
+        {
+            return NotFound();
+        }
+
+        await FillWarehouseOptionsAsync(order);
+
+        return View(order);
+    }
+
+    public async Task<IActionResult> AddItem(int purchaseOrderId)
+    {
+        var item = new PurchaseOrderItemViewModel
+        {
+            PurchaseOrderId = purchaseOrderId
+        };
+
+        await FillVariantOptionsAsync(item);
+
+        return View(item);
+    }
+
+    [HttpPost]
+    public async Task<IActionResult> AddItem(PurchaseOrderItemViewModel item)
+    {
+        var response = await _httpClient.PostAsJsonAsync($"api/purchaseorders/{item.PurchaseOrderId}/items", item);
+
+        return RedirectToAction(nameof(Details), new { id = item.PurchaseOrderId });
+    }
+
+    [HttpPost]
+    public async Task<IActionResult> Receive(int id, int warehouseId)
+    {
+        var response = await _httpClient.PostAsync($"api/purchaseorders/{id}/receive?warehouseId={warehouseId}", null);
+
+        return RedirectToAction(nameof(Details), new { id });
+    }
+
+    private async Task FillSupplierOptionsAsync(PurchaseOrderViewModel order)
+    {
+        var suppliers = await _httpClient.GetFromJsonAsync<List<SupplierViewModel>>("api/suppliers") ?? [];
+
+        order.SupplierOptions = suppliers.Select(supplier => new SelectListItem
+        {
+            Value = supplier.Id.ToString(),
+            Text = supplier.Name
+        }).ToList();
+    }
+
+    private async Task FillWarehouseOptionsAsync(PurchaseOrderViewModel order)
+    {
+        var warehouses = await _httpClient.GetFromJsonAsync<List<WarehouseViewModel>>("api/warehouses")?? [];
+
+        order.WarehouseOptions = warehouses.Select(warehouse => new SelectListItem
+        {
+            Value = warehouse.Id.ToString(),
+            Text = warehouse.Name
+        }).ToList();
+    }
+
+    private async Task FillVariantOptionsAsync(PurchaseOrderItemViewModel item)
+    {
+        var variants = await _httpClient.GetFromJsonAsync<List<ProductVariantViewModel>>("api/products/variants")?? [];
+
+        item.VariantOptions = variants.Select(variant => new SelectListItem
+        {
+            Value = variant.Id.ToString(),
+            Text = $"{variant.ProductName} - {variant.Size} - {variant.Color}"
+        }).ToList();
+    }
+}
