@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using StockFlow.Domain.Entities;
+using StockFlow.Domain.Enums;
 using StockFlow.Domain.Interfaces;
 using StockFlow.Infrastructure.Data;
 
@@ -76,5 +77,64 @@ public class StockRepository : IStockRepository
     {
         await _context.StockMovements.AddRangeAsync(movements);
         await _context.SaveChangesAsync();
+    }
+
+    public async Task<StockTransfer> RegisterTransferAsync(StockTransfer transfer)
+    {
+        var fromStock = await _context.StockItems
+            .FirstAsync(item =>
+                item.ProductVariantId == transfer.ProductVariantId &&
+                item.WarehouseId == transfer.FromWarehouseId);
+
+        var toStock = await _context.StockItems
+            .FirstOrDefaultAsync(item =>
+                item.ProductVariantId == transfer.ProductVariantId &&
+                item.WarehouseId == transfer.ToWarehouseId);
+
+        if (fromStock.Quantity < transfer.Quantity)
+        {
+            throw new InvalidOperationException("Estoque insuficiente.");
+        }
+
+        if (toStock is null)
+        {
+            toStock = new StockItem
+            {
+                ProductVariantId = transfer.ProductVariantId,
+                WarehouseId = transfer.ToWarehouseId,
+                Quantity = 0
+            };
+
+            await _context.StockItems.AddAsync(toStock);
+        }
+
+        fromStock.Quantity -= transfer.Quantity;
+        toStock.Quantity += transfer.Quantity;
+
+        await _context.StockMovements.AddAsync(new StockMovement
+        {
+            ProductVariantId = transfer.ProductVariantId,
+            WarehouseId = transfer.FromWarehouseId,
+            Type = StockMovementType.Exit,
+            Quantity = transfer.Quantity,
+            CreatedAt = transfer.CreatedAt,
+            Reason = "Transferência entre armazéns"
+        });
+
+        await _context.StockMovements.AddAsync(new StockMovement
+        {
+            ProductVariantId = transfer.ProductVariantId,
+            WarehouseId = transfer.ToWarehouseId,
+            Type = StockMovementType.Entry,
+            Quantity = transfer.Quantity,
+            CreatedAt = transfer.CreatedAt,
+            Reason = "Transferência entre armazéns"
+        });
+
+        await _context.StockTransfers.AddAsync(transfer);
+
+        await _context.SaveChangesAsync();
+
+        return transfer;
     }
 }

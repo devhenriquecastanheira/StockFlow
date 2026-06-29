@@ -10,11 +10,11 @@ public class StockTransfer
 {
     public int Id { get; set; }
     public int ProductVariantId { get; set; }
-    public ProductVariant ProductVariant { get; set; } = null!;
+    public ProductVariant? ProductVariant { get; set; }
     public int FromWarehouseId { get; set; }
-    public Warehouse FromWarehouse { get; set; } = null!;
+    public Warehouse? FromWarehouse { get; set; }
     public int ToWarehouseId { get; set; }
-    public Warehouse ToWarehouse { get; set; } = null!;
+    public Warehouse? ToWarehouse { get; set; }
     public int Quantity { get; set; }
     public DateTime CreatedAt { get; set; }
 }

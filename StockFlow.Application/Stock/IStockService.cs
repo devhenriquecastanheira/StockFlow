@@ -14,4 +14,5 @@ public interface IStockService
     Task<List<StockMovement>> GetMovementsAsync(int productVariantId);
     Task<StockMovement> RegisterMovementAsync(StockMovement movement);
     Task<List<StockMovement>> RegisterExitAcrossWarehousesAsync(int productVariantId, int quantity, string reason);
+    Task<StockTransfer> RegisterTransferAsync(StockTransfer transfer);
 }

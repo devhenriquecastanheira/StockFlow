@@ -127,4 +127,21 @@ public class StockService : IStockService
 
         return movements;
     }
+
+    public async Task<StockTransfer> RegisterTransferAsync(StockTransfer transfer)
+    {
+        if (transfer.FromWarehouseId == transfer.ToWarehouseId)
+        {
+            throw new InvalidOperationException("Origem e destino devem ser diferentes.");
+        }
+
+        if (transfer.Quantity <= 0)
+        {
+            throw new InvalidOperationException("Quantidade deve ser maior que zero.");
+        }
+
+        transfer.CreatedAt = DateTime.UtcNow;
+
+        return await _stockRepository.RegisterTransferAsync(transfer);
+    }
 }

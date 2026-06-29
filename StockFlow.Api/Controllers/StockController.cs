@@ -70,4 +70,19 @@ public class StockController : ControllerBase
             return BadRequest(ex.Message);
         }
     }
+
+    [HttpPost("transfers")]
+    public async Task<ActionResult<StockTransfer>> RegisterTransfer(StockTransfer transfer)
+    {
+        try
+        {
+            var createdTransfer = await _stockService.RegisterTransferAsync(transfer);
+
+            return Ok(createdTransfer);
+        }
+        catch (InvalidOperationException ex)
+        {
+            return BadRequest(ex.Message);
+        }
+    }
 }
