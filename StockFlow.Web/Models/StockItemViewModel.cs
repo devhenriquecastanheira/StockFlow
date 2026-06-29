@@ -6,4 +6,6 @@ public class StockItemViewModel
     public int ProductVariantId { get; set; }
     public int WarehouseId { get; set; }
     public int Quantity { get; set; }
+    public ProductVariantViewModel ProductVariant { get; set; }
+    public WarehouseViewModel Warehouse { get; set; }
 }

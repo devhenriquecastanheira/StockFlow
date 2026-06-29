@@ -29,9 +29,23 @@ else
             @foreach (var stockItem in Model)
             {
                 <tr>
-                    <td>@stockItem.ProductVariantId</td>
-                    <td>@stockItem.WarehouseId</td>
-                    <td>@stockItem.Quantity</td>
+                    <td>
+                        @($"{stockItem.ProductVariant?.Size} - {stockItem.ProductVariant?.Color} - {stockItem.ProductVariant?.Sku}")
+                    </td>
+
+                    <td>
+                        @(stockItem.Warehouse?.Name ?? stockItem.WarehouseId.ToString())
+                    </td>
+
+                    <td>
+                        @stockItem.Quantity
+
+                        @if (stockItem.Quantity <= stockItem.ProductVariant?.MinimumStockLevel)
+                        {
+                            <span style="color: red;"> - Estoque baixo</span>
+                        }
+                    </td>
+
                     <td>
                         <a asp-action="Details" asp-route-productVariantId="@stockItem.ProductVariantId">Movimentações</a> |
                         <a asp-action="Create" asp-route-productVariantId="@stockItem.ProductVariantId" asp-route-warehouseId="@stockItem.WarehouseId">Movimentar</a>
