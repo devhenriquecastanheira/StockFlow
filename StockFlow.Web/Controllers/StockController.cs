@@ -81,4 +81,35 @@ public class StockController : Controller
             new("Ajuste", StockMovementTypeViewModel.Adjustment.ToString())
         };
     }
+
+    public IActionResult Transfer(int? productVariantId, int? fromWarehouseId)
+    {
+        var transfer = new StockTransferViewModel
+        {
+            ProductVariantId = productVariantId ?? 0,
+            FromWarehouseId = fromWarehouseId ?? 0
+        };
+
+        return View(transfer);
+    }
+
+    [HttpPost]
+    public async Task<IActionResult> Transfer(StockTransferViewModel transfer)
+    {
+        if (!ModelState.IsValid)
+        {
+            return View(transfer);
+        }
+
+        var response = await _httpClient.PostAsJsonAsync("api/stock/transfers", transfer);
+
+        if (response.IsSuccessStatusCode)
+        {
+            return RedirectToAction(nameof(Details), new { productVariantId = transfer.ProductVariantId });
+        }
+
+        ModelState.AddModelError(string.Empty, "Não foi possível registrar a transferência.");
+
+        return View(transfer);
+    }
 }

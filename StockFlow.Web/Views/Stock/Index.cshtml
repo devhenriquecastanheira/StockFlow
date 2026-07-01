@@ -48,7 +48,8 @@ else
 
                     <td>
                         <a asp-action="Details" asp-route-productVariantId="@stockItem.ProductVariantId">Movimentações</a> |
-                        <a asp-action="Create" asp-route-productVariantId="@stockItem.ProductVariantId" asp-route-warehouseId="@stockItem.WarehouseId">Movimentar</a>
+                        <a asp-action="Create" asp-route-productVariantId="@stockItem.ProductVariantId" asp-route-warehouseId="@stockItem.WarehouseId">Movimentar</a> |
+                        <a asp-action="Transfer" asp-route-productVariantId="@stockItem.ProductVariantId" asp-route-fromWarehouseId="@stockItem.WarehouseId">Transferir</a>
                     </td>
                 </tr>
             }
