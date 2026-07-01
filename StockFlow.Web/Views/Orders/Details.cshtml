@@ -1,13 +1,27 @@
 ﻿@model OrderViewModel
 
 @{
-    ViewData["Title"] = "Detalhes";
+    ViewData["Title"] = "Revisar carrinho";
 }
 
-<h1>Detalhes</h1>
+<h1>Revisar carrinho</h1>
+
+@if (TempData["Error"] is not null)
+{
+    <div class="alert alert-danger">
+        @TempData["Error"]
+    </div>
+}
+
+@if (TempData["Success"] is not null)
+{
+    <div class="alert alert-success">
+        @TempData["Success"]
+    </div>
+}
 
 <div>
-    <h4>Pedidos</h4>
+    <h4>Dados do pedido</h4>
     <hr />
     <dl class="row">
         <dt class="col-sm-2">Nome do Cliente</dt>
@@ -25,7 +39,7 @@
     @if (Model.Status == OrderStatusViewModel.Pending)
     {
         <form asp-action="ConfirmOrder" asp-route-orderId="@Model.Id" method="post" style="display:inline">
-            <button type="submit" class="btn btn-link">Confirmar pedido</button>
+            <button type="submit" class="btn btn-primary">Finalizar compra</button>
         </form>
     }
 

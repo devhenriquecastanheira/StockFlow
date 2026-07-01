@@ -57,6 +57,12 @@ public class OrdersController : Controller
             var response = await _httpClient.PostAsJsonAsync("api/orders", order);
             if (response.IsSuccessStatusCode)
             {
+                var createdOrder = await response.Content.ReadFromJsonAsync<OrderViewModel>();
+                if (createdOrder is not null)
+                {
+                    return RedirectToAction(nameof(Details), new { id = createdOrder.Id });
+                }
+
                 return RedirectToAction(nameof(Index));
             }
 
@@ -169,7 +175,11 @@ public class OrdersController : Controller
 
         response.EnsureSuccessStatusCode();
 
-        var order = await response.Content.ReadFromJsonAsync<OrderItemViewModel>();
+        var order = new OrderItemViewModel
+        {
+            Id = orderId.Value,
+            Quantity = 1
+        };
 
         await FillVariantOptionsAsync(order);
 
@@ -186,6 +196,7 @@ public class OrdersController : Controller
             return RedirectToAction(nameof(Details), new { id = orderId });
         }
 
+        orderItem.Id = orderId;
         await FillVariantOptionsAsync(orderItem);
 
         return View(orderItem);
@@ -256,7 +267,12 @@ public class OrdersController : Controller
 
         var order = await response.Content.ReadFromJsonAsync<OrderViewModel>();
 
-        var item = order?.Items.FirstOrDefault(i => i.Id == itemId.Value);
+        if (order is null)
+        {
+            return NotFound();
+        }
+
+        var item = order.Items.FirstOrDefault(i => i.Id == itemId.Value);
 
         if (item is null)
         {
@@ -283,8 +299,15 @@ public class OrdersController : Controller
 
         if (response.IsSuccessStatusCode)
         {
+            TempData["Success"] = "Pedido finalizado com sucesso.";
             return RedirectToAction(nameof(Details), new { id = orderId });
         }
+
+        var error = await response.Content.ReadAsStringAsync();
+
+        TempData["Error"] = string.IsNullOrWhiteSpace(error)
+            ? "Não foi possível finalizar o pedido."
+            : error;
 
         return RedirectToAction(nameof(Details), new { id = orderId });
     }
