@@ -1,4 +1,5 @@
-﻿using FluentValidation;
+using FluentValidation;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using StockFlow.Application.Categories;
 using StockFlow.Domain.Entities;
@@ -7,6 +8,7 @@ namespace StockFlow.Api.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
+[Authorize(Roles = "Admin,Operador")]
 public class CategoriesController : ControllerBase
 {
     private readonly ICategoryService _categoryService;
@@ -17,6 +19,7 @@ public class CategoriesController : ControllerBase
     }
 
     [HttpGet]
+    [AllowAnonymous]
     public async Task<ActionResult<List<Category>>> GetAll()
     {
         var categories = await _categoryService.GetAllAsync();
@@ -25,6 +28,7 @@ public class CategoriesController : ControllerBase
     }
 
     [HttpGet("{id:int}")]
+    [AllowAnonymous]
     public async Task<ActionResult<Category>> GetById(int id)
     {
         var category = await _categoryService.GetByIdAsync(id);

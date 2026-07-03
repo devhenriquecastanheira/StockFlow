@@ -23,6 +23,9 @@ public sealed class StockFlowDbContext(DbContextOptions<StockFlowDbContext> opti
     public DbSet<PurchaseOrderItem> PurchaseOrderItems => Set<PurchaseOrderItem>();
     public DbSet<PhysicalInventory> PhysicalInventories => Set<PhysicalInventory>();
     public DbSet<PhysicalInventoryItem> PhysicalInventoryItems => Set<PhysicalInventoryItem>();
+    public DbSet<User> Users => Set<User>();
+    public DbSet<CustomerProfile> CustomerProfiles => Set<CustomerProfile>();
+    public DbSet<CustomerAddress> CustomerAddresses => Set<CustomerAddress>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -30,6 +33,22 @@ public sealed class StockFlowDbContext(DbContextOptions<StockFlowDbContext> opti
 
         modelBuilder.Entity<ProductTag>()
             .HasKey(productTag => new { productTag.ProductId, productTag.TagId });
+
+        modelBuilder.Entity<User>()
+            .HasIndex(user => user.Email)
+            .IsUnique();
+
+        modelBuilder.Entity<User>()
+            .HasOne(user => user.CustomerProfile)
+            .WithOne(profile => profile.User)
+            .HasForeignKey<CustomerProfile>(profile => profile.UserId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<CustomerProfile>()
+            .HasMany(profile => profile.Addresses)
+            .WithOne(address => address.CustomerProfile)
+            .HasForeignKey(address => address.CustomerProfileId)
+            .OnDelete(DeleteBehavior.Cascade);
 
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(StockFlowDbContext).Assembly);
     }

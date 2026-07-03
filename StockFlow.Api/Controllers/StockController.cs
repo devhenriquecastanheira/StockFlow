@@ -1,4 +1,5 @@
-﻿using FluentValidation;
+using FluentValidation;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using StockFlow.Application.Stock;
 using StockFlow.Domain.Entities;
@@ -7,6 +8,7 @@ namespace StockFlow.Api.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
+[Authorize(Roles = "Admin,Operador")]
 public class StockController : ControllerBase
 {
     private readonly IStockService _stockService;

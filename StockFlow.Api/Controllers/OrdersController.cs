@@ -1,5 +1,5 @@
-﻿using Microsoft.AspNetCore.Http;
 using FluentValidation;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using StockFlow.Application.Orders;
 using StockFlow.Domain.Entities;
@@ -19,6 +19,7 @@ public class OrdersController : ControllerBase
     }
 
     [HttpGet]
+    [Authorize(Roles = "Admin,Operador")]
     public async Task<ActionResult<List<OrderDto>>> GetAll()
     {
         var orders = await _orderService.GetOrdersAsync();
@@ -26,6 +27,7 @@ public class OrdersController : ControllerBase
     }
 
     [HttpGet("{id}")]
+    [Authorize(Roles = "Admin,Operador,Cliente")]
     public async Task<ActionResult<OrderDto>> GetById(int id)
     {
         var order = await _orderService.GetOrderAsync(id);
@@ -37,6 +39,7 @@ public class OrdersController : ControllerBase
     }
 
     [HttpPost]
+    [Authorize(Roles = "Admin,Operador,Cliente")]
     public async Task<ActionResult<Order>> Create(Order order)
     {
         var createdOrder = await _orderService.AddOrderAsync(order);
@@ -44,6 +47,7 @@ public class OrdersController : ControllerBase
     }
 
     [HttpPut("{id}")]
+    [Authorize(Roles = "Admin,Operador")]
     public async Task<ActionResult<OrderDto>> Update(int id, Order order)
     {
         var updatedOrder = await _orderService.UpdateOrderAsync(id, order);
@@ -55,6 +59,7 @@ public class OrdersController : ControllerBase
     }
 
     [HttpDelete("{id}")]
+    [Authorize(Roles = "Admin,Operador")]
     public async Task<ActionResult> Delete(int id)
     {
         var deleted = await _orderService.DeleteOrderAsync(id);
@@ -66,6 +71,7 @@ public class OrdersController : ControllerBase
     }
 
     [HttpPatch("{id}/status")]
+    [Authorize(Roles = "Admin,Operador")]
     public async Task<ActionResult<OrderDto>> ChangeStatus(int id, [FromBody] OrderStatus newStatus)
     {
         var updatedOrder = await _orderService.ChangeOrderStatusAsync(id, newStatus);
@@ -77,6 +83,7 @@ public class OrdersController : ControllerBase
     }
 
     [HttpPost("{orderId}/items")]
+    [Authorize(Roles = "Admin,Operador,Cliente")]
     public async Task<ActionResult<OrderDto>> AddItem(int orderId, CreateOrderItemDto item)
     {
         var updatedOrder = await _orderService.AddOrderItemAsync(orderId, item);
@@ -88,6 +95,7 @@ public class OrdersController : ControllerBase
     }
 
     [HttpDelete("{orderId}/items/{itemId}")]
+    [Authorize(Roles = "Admin,Operador,Cliente")]
     public async Task<ActionResult> RemoveItem(int orderId, int itemId)
     {
         var removedItem = await _orderService.RemoveOrderItemAsync(orderId, itemId);
@@ -99,6 +107,7 @@ public class OrdersController : ControllerBase
     }
 
     [HttpPost("{orderId}/confirm")]
+    [Authorize(Roles = "Admin,Operador,Cliente")]
     public async Task<ActionResult<OrderDto>> ConfirmOrder(int orderId)
     {
         try

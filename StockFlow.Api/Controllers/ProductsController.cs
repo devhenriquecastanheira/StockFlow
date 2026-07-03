@@ -1,4 +1,5 @@
-﻿using FluentValidation;
+using FluentValidation;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using StockFlow.Application.Products;
 using StockFlow.Domain.Entities;
@@ -7,6 +8,7 @@ namespace StockFlow.Api.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
+[Authorize(Roles = "Admin,Operador")]
 public class ProductsController : ControllerBase
 {
     private readonly IProductService _productService;
@@ -17,6 +19,7 @@ public class ProductsController : ControllerBase
     }
 
     [HttpGet]
+    [AllowAnonymous]
     public async Task<ActionResult<List<Product>>> GetAll()
     {
         var products = await _productService.GetAllAsync();
@@ -25,6 +28,7 @@ public class ProductsController : ControllerBase
     }
 
     [HttpGet("{id:int}")]
+    [AllowAnonymous]
     public async Task<ActionResult<Product>> GetById(int id)
     {
         var product = await _productService.GetByIdAsync(id);
@@ -89,6 +93,7 @@ public class ProductsController : ControllerBase
     }
 
     [HttpGet("variants")]
+    [AllowAnonymous]
     public async Task<ActionResult<List<ProductVariantDto>>> GetVariants()
     {
         var variants = await _productService.GetVariantsAsync();
@@ -97,6 +102,7 @@ public class ProductsController : ControllerBase
     }
 
     [HttpGet("variants/{id:int}")]
+    [AllowAnonymous]
     public async Task<ActionResult<ProductVariantDto>> GetVariantById(int id)
     {
         var variant = await _productService.GetVariantByIdAsync(id);
@@ -110,6 +116,7 @@ public class ProductsController : ControllerBase
     }
 
     [HttpGet("{productId:int}/variants")]
+    [AllowAnonymous]
     public async Task<ActionResult<List<ProductVariantDto>>> GetVariantsByProductId(int productId)
     {
         var variants = await _productService.GetVariantsByProductIdAsync(productId);

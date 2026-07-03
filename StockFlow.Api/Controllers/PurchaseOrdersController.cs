@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using StockFlow.Application.PurchaseOrders;
 using StockFlow.Domain.Entities;
 
@@ -6,6 +7,7 @@ namespace StockFlow.Api.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]
+[Authorize(Roles = "Admin,Operador")]
 public class PurchaseOrdersController : ControllerBase
 {
     private readonly IPurchaseOrderService _purchaseOrderService;
