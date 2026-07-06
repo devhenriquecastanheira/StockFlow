@@ -16,19 +16,25 @@
 
             <div class="form-group mb-3">
                 <label asp-for="ProductVariantId" class="control-label"></label>
-                <input asp-for="ProductVariantId" class="form-control" type="number" min="1" />
+                <select asp-for="ProductVariantId" asp-items="Model.VariantOptions" class="form-select">
+                    <option value="">Selecione uma variante</option>
+                </select>
                 <span asp-validation-for="ProductVariantId" class="text-danger"></span>
             </div>
 
             <div class="form-group mb-3">
                 <label asp-for="FromWarehouseId" class="control-label"></label>
-                <input asp-for="FromWarehouseId" class="form-control" type="number" min="1" />
+                <select asp-for="FromWarehouseId" asp-items="Model.WarehouseOptions" class="form-select">
+                    <option value="">Selecione o armazém de origem</option>
+                </select>
                 <span asp-validation-for="FromWarehouseId" class="text-danger"></span>
             </div>
 
             <div class="form-group mb-3">
                 <label asp-for="ToWarehouseId" class="control-label"></label>
-                <input asp-for="ToWarehouseId" class="form-control" type="number" min="1" />
+                <select asp-for="ToWarehouseId" asp-items="Model.WarehouseOptions" class="form-select">
+                    <option value="">Selecione o armazém de destino</option>
+                </select>
                 <span asp-validation-for="ToWarehouseId" class="text-danger"></span>
             </div>
 

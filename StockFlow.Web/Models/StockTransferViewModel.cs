@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace StockFlow.Web.Models;
 
@@ -18,4 +19,7 @@ public class StockTransferViewModel
     [Display(Name = "Quantidade")]
     public int Quantity { get; set; }
     public DateTime CreatedAt { get; set; }
+
+    public List<SelectListItem> VariantOptions { get; set; } = [];
+    public List<SelectListItem> WarehouseOptions { get; set; } = [];
 }

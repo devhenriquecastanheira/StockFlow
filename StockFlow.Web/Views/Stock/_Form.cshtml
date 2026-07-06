@@ -4,13 +4,17 @@
 
 <div class="form-group mb-3">
     <label asp-for="ProductVariantId" class="control-label"></label>
-    <input asp-for="ProductVariantId" class="form-control" type="number" min="1" />
+    <select asp-for="ProductVariantId" asp-items="Model.VariantOptions" class="form-select">
+        <option value="">Selecione uma variante</option>
+    </select>
     <span asp-validation-for="ProductVariantId" class="text-danger"></span>
 </div>
 
 <div class="form-group mb-3">
     <label asp-for="WarehouseId" class="control-label"></label>
-    <input asp-for="WarehouseId" class="form-control" type="number" min="1" />
+    <select asp-for="WarehouseId" asp-items="Model.WarehouseOptions" class="form-select">
+        <option value="">Selecione um armazém</option>
+    </select>
     <span asp-validation-for="WarehouseId" class="text-danger"></span>
 </div>
 

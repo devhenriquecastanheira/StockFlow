@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace StockFlow.Web.Models;
 
@@ -28,4 +29,7 @@ public class StockMovementViewModel
     [Display(Name = "Motivo")]
     [StringLength(500)]
     public string Reason { get; set; } = string.Empty;
+
+    public List<SelectListItem> VariantOptions { get; set; } = [];
+    public List<SelectListItem> WarehouseOptions { get; set; } = [];
 }
