@@ -16,13 +16,21 @@
         <dd class="col-sm-10">@(string.IsNullOrWhiteSpace(Model.Description) ? "-" : Model.Description)</dd>
         <dt class="col-sm-2">Categoria</dt>
         <dd class="col-sm-10">@Model.CategoryName</dd>
-        <dt class="col-sm-2">Preço de custo</dt>
-        <dd class="col-sm-10">@Model.CostPrice.ToString("C")</dd>
+        @if (User.IsInRole("Admin") || User.IsInRole("Operador"))
+        {
+            <dt class="col-sm-2">Preço de custo</dt>
+            <dd class="col-sm-10">@Model.CostPrice.ToString("C")</dd>
+        }
         <dt class="col-sm-2">Preço de venda</dt>
         <dd class="col-sm-10">@Model.SalePrice.ToString("C")</dd>
     </dl>
 </div>
 <div>
-    <a asp-action="Edit" asp-route-id="@Model.Id">Editar</a> |
+    @if (User.IsInRole("Admin") || User.IsInRole("Operador"))
+    {
+        <a asp-action="Edit" asp-route-id="@Model.Id">Editar</a>
+        <span>|</span>
+    }
+    <a asp-controller="ProductVariants" asp-action="Index" asp-route-productId="@Model.Id">Variantes</a> |
     <a asp-action="Index">Voltar</a>
 </div>

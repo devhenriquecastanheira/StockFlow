@@ -1,11 +1,13 @@
 using System.Net;
 using System.Net.Http.Json;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using StockFlow.Web.Models;
 
 namespace StockFlow.Web.Controllers;
 
+[Authorize(Roles = "Admin,Operador,Cliente")]
 public class ProductsController : Controller
 {
     private readonly HttpClient _httpClient;
@@ -51,6 +53,7 @@ public class ProductsController : Controller
         return View(product);
     }
 
+    [Authorize(Roles = "Admin,Operador")]
     public async Task<IActionResult> Create()
     {
         var product = new ProductViewModel();
@@ -59,6 +62,7 @@ public class ProductsController : Controller
         return View(product);
     }
 
+    [Authorize(Roles = "Admin,Operador")]
     [HttpPost]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Create([Bind("Id,Name,Description,CostPrice,SalePrice,CategoryId")] ProductViewModel product)
@@ -72,7 +76,7 @@ public class ProductsController : Controller
                 return RedirectToAction(nameof(Index));
             }
 
-            await AddApiErrorAsync(response, "Não foi possível cadastrar o produto.");
+            ModelState.AddModelError(string.Empty, "Não foi possível cadastrar o produto.");
         }
 
         await FillCategoryOptionsAsync(product);
@@ -80,6 +84,7 @@ public class ProductsController : Controller
         return View(product);
     }
 
+    [Authorize(Roles = "Admin,Operador")]
     public async Task<IActionResult> Edit(int? id)
     {
         if (id == null)
@@ -102,6 +107,7 @@ public class ProductsController : Controller
         return View(product);
     }
 
+    [Authorize(Roles = "Admin,Operador")]
     [HttpPost]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Edit(int id, [Bind("Id,Name,Description,CostPrice,SalePrice,CategoryId")] ProductViewModel product)
@@ -125,7 +131,7 @@ public class ProductsController : Controller
                 return RedirectToAction(nameof(Index));
             }
 
-            await AddApiErrorAsync(response, "Não foi possível atualizar o produto.");
+            ModelState.AddModelError(string.Empty, "Não foi possível atualizar o produto.");
         }
 
         await FillCategoryOptionsAsync(product);
@@ -133,6 +139,7 @@ public class ProductsController : Controller
         return View(product);
     }
 
+    [Authorize(Roles = "Admin,Operador")]
     public async Task<IActionResult> Delete(int? id)
     {
         if (id == null)
@@ -155,6 +162,7 @@ public class ProductsController : Controller
         return View(product);
     }
 
+    [Authorize(Roles = "Admin,Operador")]
     [HttpPost, ActionName("Delete")]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> DeleteConfirmed(int id)
@@ -201,16 +209,4 @@ public class ProductsController : Controller
             ?? [];
     }
 
-    private async Task AddApiErrorAsync(HttpResponseMessage response, string fallbackMessage)
-    {
-        var responseBody = await response.Content.ReadAsStringAsync();
-
-        if (string.IsNullOrWhiteSpace(responseBody))
-        {
-            ModelState.AddModelError(string.Empty, fallbackMessage);
-            return;
-        }
-
-        ModelState.AddModelError(string.Empty, $"{fallbackMessage} {responseBody}");
-    }
 }

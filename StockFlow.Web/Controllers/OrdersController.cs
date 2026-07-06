@@ -1,10 +1,12 @@
-﻿using Microsoft.AspNetCore.Mvc;
+using System.Net;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using StockFlow.Web.Models;
-using System.Net;
 
 namespace StockFlow.Web.Controllers;
 
+[Authorize(Roles = "Admin,Operador,Cliente")]
 public class OrdersController : Controller
 {
     private readonly HttpClient _httpClient;
@@ -14,6 +16,7 @@ public class OrdersController : Controller
         _httpClient = httpClientFactory.CreateClient("StockFlowApi");
     }
 
+    [Authorize(Roles = "Admin,Operador")]
     public async Task<IActionResult> Index()
     {
         var orders = await _httpClient.GetFromJsonAsync<List<OrderViewModel>>("api/orders")
@@ -43,15 +46,34 @@ public class OrdersController : Controller
         return View(order);
     }
 
-    public IActionResult Create()
+    public async Task<IActionResult> Create()
     {
-        return View();
+        if (!User.IsInRole("Cliente"))
+        {
+            return View();
+        }
+
+        var profile = await GetCustomerProfileAsync();
+        var order = new OrderViewModel
+        {
+            CustomerName = profile?.User.Name ?? User.Identity?.Name ?? string.Empty,
+            CustomerEmail = profile?.User.Email ?? string.Empty
+        };
+
+        return View(order);
     }
 
     [HttpPost]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Create([Bind("Id,CustomerName,CustomerEmail,Status")] OrderViewModel order)
     {
+        if (User.IsInRole("Cliente"))
+        {
+            var profile = await GetCustomerProfileAsync();
+            order.CustomerName = profile?.User.Name ?? User.Identity?.Name ?? order.CustomerName;
+            order.CustomerEmail = profile?.User.Email ?? order.CustomerEmail;
+        }
+
         if (ModelState.IsValid)
         {
             var response = await _httpClient.PostAsJsonAsync("api/orders", order);
@@ -72,6 +94,7 @@ public class OrdersController : Controller
         return View(order);
     }
 
+    [Authorize(Roles = "Admin,Operador")]
     public async Task<IActionResult> Delete(int? id)
     {
         if (id == null)
@@ -93,6 +116,7 @@ public class OrdersController : Controller
         return View(order);
     }
 
+    [Authorize(Roles = "Admin,Operador")]
     [HttpPost, ActionName("Delete")]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> DeleteConfirmed(int id)
@@ -109,6 +133,7 @@ public class OrdersController : Controller
         return RedirectToAction(nameof(Index));
     }
 
+    [Authorize(Roles = "Admin,Operador")]
     public async Task<IActionResult> Edit(int? id)
     {
         if (id == null)
@@ -130,6 +155,7 @@ public class OrdersController : Controller
         return View(order);
     }
 
+    [Authorize(Roles = "Admin,Operador")]
     [HttpPost]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Edit(int id, [Bind("Id,CustomerName,CustomerEmail")] OrderViewModel order)
@@ -189,6 +215,17 @@ public class OrdersController : Controller
     [HttpPost]
     public async Task<IActionResult> AddItem(int orderId, [Bind("ProductVariantId,Quantity,UnitPrice")] OrderItemViewModel orderItem)
     {
+        if (User.IsInRole("Cliente"))
+        {
+            var salePrice = await GetSalePriceAsync(orderItem.ProductVariantId);
+            if (salePrice is null)
+            {
+                return NotFound();
+            }
+
+            orderItem.UnitPrice = salePrice.Value;
+        }
+
         var response = await _httpClient.PostAsJsonAsync($"api/orders/{orderId}/items", orderItem);
 
         if (response.IsSuccessStatusCode)
@@ -214,6 +251,26 @@ public class OrdersController : Controller
         }).ToList();
     }
 
+    private async Task<decimal?> GetSalePriceAsync(int productVariantId)
+    {
+        var products = await _httpClient.GetFromJsonAsync<List<ProductViewModel>>("api/products")
+            ?? [];
+
+        foreach (var product in products)
+        {
+            var variants = await _httpClient.GetFromJsonAsync<List<ProductVariantViewModel>>(
+                $"api/products/{product.Id}/variants") ?? [];
+
+            if (variants.Any(variant => variant.Id == productVariantId))
+            {
+                return product.SalePrice;
+            }
+        }
+
+        return null;
+    }
+
+    [Authorize(Roles = "Admin,Operador")]
     public async Task<IActionResult> ChangeStatusAsync(int? orderId)
     {
         if (orderId == null)
@@ -235,6 +292,7 @@ public class OrdersController : Controller
         return View(order);
     }
 
+    [Authorize(Roles = "Admin,Operador")]
     [HttpPost]
     public async Task<IActionResult> ChangeStatusAsync(int id, [Bind("Status")] OrderViewModel order)
     {
@@ -310,5 +368,17 @@ public class OrdersController : Controller
             : error;
 
         return RedirectToAction(nameof(Details), new { id = orderId });
+    }
+
+    private async Task<CustomerProfileViewModel?> GetCustomerProfileAsync()
+    {
+        var response = await _httpClient.GetAsync("api/customers/me");
+
+        if (!response.IsSuccessStatusCode)
+        {
+            return null;
+        }
+
+        return await response.Content.ReadFromJsonAsync<CustomerProfileViewModel>();
     }
 }

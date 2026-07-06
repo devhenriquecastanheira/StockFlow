@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Net;
 using System.Net.Http.Json;
@@ -5,6 +6,7 @@ using StockFlow.Web.Models;
 
 namespace StockFlow.Web.Controllers;
 
+[Authorize(Roles = "Admin,Operador")]
 public class CategoriesController : Controller
 {
     private readonly HttpClient _httpClient;

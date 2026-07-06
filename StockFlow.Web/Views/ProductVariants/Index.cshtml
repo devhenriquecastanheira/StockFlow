@@ -10,9 +10,18 @@
     <h4>@Model.Name</h4>
     <hr />
 
-    <p>
-        <a asp-action="Create" asp-route-productId="@Model.Id">Nova variante</a>
-    </p>
+    @if (User.IsInRole("Admin") || User.IsInRole("Operador"))
+    {
+        <p>
+            <a asp-action="Create" asp-route-productId="@Model.Id">Nova variante</a>
+        </p>
+    }
+    else if (User.IsInRole("Cliente"))
+    {
+        <p>
+            <a asp-controller="Orders" asp-action="Create" class="btn btn-primary">Iniciar carrinho</a>
+        </p>
+    }
 
     @if (Model.Variants.Count == 0)
     {
@@ -26,7 +35,10 @@
                     <th>SKU</th>
                     <th>Tamanho</th>
                     <th>Cor</th>
-                    <th>Estoque mínimo</th>
+                    @if (User.IsInRole("Admin") || User.IsInRole("Operador"))
+                    {
+                        <th>Estoque mínimo</th>
+                    }
                     <th></th>
                 </tr>
             </thead>
@@ -37,10 +49,21 @@
                         <td>@variant.Sku</td>
                         <td>@variant.Size</td>
                         <td>@variant.Color</td>
-                        <td>@variant.MinimumStockLevel</td>
+                        @if (User.IsInRole("Admin") || User.IsInRole("Operador"))
+                        {
+                            <td>@variant.MinimumStockLevel</td>
+                        }
                         <td>
-                            <a asp-action="Edit" asp-route-id="@variant.Id">Editar</a> |
-                            <a asp-action="Delete" asp-route-id="@variant.Id">Excluir</a>
+                            @if (User.IsInRole("Admin") || User.IsInRole("Operador"))
+                            {
+                                <a asp-action="Edit" asp-route-id="@variant.Id">Editar</a>
+                                <span>|</span>
+                                <a asp-action="Delete" asp-route-id="@variant.Id">Excluir</a>
+                            }
+                            else
+                            {
+                                <span>-</span>
+                            }
                         </td>
                     </tr>
                 }

@@ -1,0 +1,13 @@
+@model CustomerAddressViewModel
+
+@{
+    ViewData["Title"] = "Editar endereço";
+}
+
+<h1>Editar endereço</h1>
+
+<partial name="_AddressForm" model="Model" />
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

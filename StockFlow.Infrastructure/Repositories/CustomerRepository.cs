@@ -28,6 +28,7 @@ public class CustomerRepository : ICustomerRepository
             .Include(address => address.CustomerProfile)
             .FirstOrDefaultAsync(address =>
                 address.Id == addressId &&
+                address.CustomerProfile != null &&
                 address.CustomerProfile.UserId == userId);
     }
 

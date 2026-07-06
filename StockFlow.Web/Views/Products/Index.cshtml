@@ -6,9 +6,18 @@
 
 <h1>Produtos</h1>
 
-<p>
-    <a asp-action="Create">Novo produto</a>
-</p>
+@if (User.IsInRole("Admin") || User.IsInRole("Operador"))
+{
+    <p>
+        <a asp-action="Create">Novo produto</a>
+    </p>
+}
+else if (User.IsInRole("Cliente"))
+{
+    <p>
+        <a asp-controller="Orders" asp-action="Create" class="btn btn-primary">Iniciar carrinho</a>
+    </p>
+}
 
 @if (Model.Count == 0)
 {
@@ -21,7 +30,10 @@ else
             <tr>
                 <th>Nome</th>
                 <th>Categoria</th>
-                <th>Preço de custo</th>
+                @if (User.IsInRole("Admin") || User.IsInRole("Operador"))
+                {
+                    <th>Preço de custo</th>
+                }
                 <th>Preço de venda</th>
                 <th></th>
             </tr>
@@ -32,13 +44,21 @@ else
                 <tr>
                     <td class="fw-medium">@product.Name</td>
                     <td class="text-secondary">@product.CategoryName</td>
-                    <td>@product.CostPrice.ToString("C")</td>
+                    @if (User.IsInRole("Admin") || User.IsInRole("Operador"))
+                    {
+                        <td>@product.CostPrice.ToString("C")</td>
+                    }
                     <td>@product.SalePrice.ToString("C")</td>
                     <td>
-                        <a asp-action="Edit" asp-route-id="@product.Id">Editar</a> |
                         <a asp-action="Details" asp-route-id="@product.Id">Detalhes</a> |
-                        <a asp-controller="ProductVariants" asp-action="Index" asp-route-productId="@product.Id">Variantes</a> |
-                        <a asp-action="Delete" asp-route-id="@product.Id">Excluir</a>
+                        <a asp-controller="ProductVariants" asp-action="Index" asp-route-productId="@product.Id">Variantes</a>
+                        @if (User.IsInRole("Admin") || User.IsInRole("Operador"))
+                        {
+                            <span>|</span>
+                            <a asp-action="Edit" asp-route-id="@product.Id">Editar</a>
+                            <span>|</span>
+                            <a asp-action="Delete" asp-route-id="@product.Id">Excluir</a>
+                        }
                     </td>
                 </tr>
             }

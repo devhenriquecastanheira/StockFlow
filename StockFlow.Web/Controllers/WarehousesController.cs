@@ -1,9 +1,11 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 using StockFlow.Web.Models;
 using System.Net;
 
 namespace StockFlow.Web.Controllers;
 
+[Authorize(Roles = "Admin,Operador")]
 public class WarehousesController : Controller
 {
     private readonly HttpClient _httpClient;

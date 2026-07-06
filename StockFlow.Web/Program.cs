@@ -1,14 +1,29 @@
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Localization;
+using StockFlow.Web.Services;
 using System.Globalization;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllersWithViews();
 
+builder.Services
+    .AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+    .AddCookie(options =>
+    {
+        options.LoginPath = "/Account/Login";
+        options.AccessDeniedPath = "/Account/AccessDenied";
+    });
+
+builder.Services.AddAuthorization();
+builder.Services.AddHttpContextAccessor();
+builder.Services.AddTransient<ApiAuthorizationHandler>();
+
 builder.Services.AddHttpClient("StockFlowApi", client =>
 {
     client.BaseAddress = new Uri(builder.Configuration["StockFlowApi:BaseUrl"]!);
-});
+})
+.AddHttpMessageHandler<ApiAuthorizationHandler>();
 
 var app = builder.Build();
 
@@ -32,6 +47,7 @@ app.UseStaticFiles();
 
 app.UseRouting();
 
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllerRoute(

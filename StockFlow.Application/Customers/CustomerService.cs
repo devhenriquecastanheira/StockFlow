@@ -25,18 +25,11 @@ public class CustomerService : ICustomerService
             return null;
         }
 
-        var address = new CustomerAddress
-        {
-            CustomerProfileId = profile.Id,
-            Street = request.Street,
-            Number = request.Number,
-            City = request.City,
-            State = request.State
-        };
+        request.CustomerProfileId = profile.Id;
 
-        await _repository.AddAddressAsync(address);
+        await _repository.AddAddressAsync(request);
 
-        return address;
+        return request;
     }
 
     public async Task<bool> UpdateAddressAsync(int userId, int addressId, CustomerAddress request)

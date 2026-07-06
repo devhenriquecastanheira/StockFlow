@@ -72,7 +72,10 @@
                         <td class="text-end">R$ @item.UnitPrice.ToString("F2")</td>
                         <td class="text-end fw-bold">R$ @item.SubTotal.ToString("F2")</td>
                         <td>
-                            <a asp-action="RemoveItem" asp-route-orderId="@Model.Id" asp-route-itemId="@item.Id">Remover</a>
+                            @if (Model.Status == OrderStatusViewModel.Pending)
+                            {
+                                <a asp-action="RemoveItem" asp-route-orderId="@Model.Id" asp-route-itemId="@item.Id">Remover</a>
+                            }
                         </td>
                     </tr>
                 }
@@ -81,10 +84,21 @@
     }
 </div>
 <div>
-    <a asp-action="AddItem" asp-route-orderId="@Model.Id">Adicionar item</a> |
-    @* <a asp-action="ChangeStatus" asp-route-orderId="@Model.Id">Alterar status</a> | *@
-    <a asp-action="Edit" asp-route-id="@Model.Id">Editar</a> |
-    <a asp-action="Index">Voltar</a>
+    @if (Model.Status == OrderStatusViewModel.Pending)
+    {
+        <a asp-action="AddItem" asp-route-orderId="@Model.Id">Adicionar item</a>
+        <span>|</span>
+    }
+    @if (User.IsInRole("Admin") || User.IsInRole("Operador"))
+    {
+        <a asp-action="Edit" asp-route-id="@Model.Id">Editar</a>
+        <span>|</span>
+        <a asp-action="Index">Voltar</a>
+    }
+    else
+    {
+        <a asp-controller="Products" asp-action="Index">Voltar ao catálogo</a>
+    }
 </div>
 
 @functions {
