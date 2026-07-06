@@ -1,9 +1,11 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.AspNetCore.Authorization;
 using StockFlow.Web.Models;
 
 namespace StockFlow.Web.Controllers;
 
+[Authorize(Roles = "Admin,Operador")]
 public class PurchaseOrdersController : Controller
 {
     private readonly HttpClient _httpClient;
@@ -47,13 +49,23 @@ public class PurchaseOrdersController : Controller
     {
         var order = await _httpClient.GetFromJsonAsync<PurchaseOrderViewModel>($"api/purchaseorders/{id}");
 
+        if (order is null)
+        {
+            return NotFound();
+        }
+
         var suppliers = await _httpClient.GetFromJsonAsync<List<SupplierViewModel>>("api/suppliers") ?? [];
 
         order.SupplierName = suppliers.FirstOrDefault(s => s.Id == order.SupplierId)?.Name ?? "";
 
-        if (order is null)
+        var variants = await _httpClient.GetFromJsonAsync<List<ProductVariantViewModel>>("api/products/variants") ?? [];
+
+        foreach (var item in order.Items)
         {
-            return NotFound();
+            var variant = variants.FirstOrDefault(v => v.Id == item.ProductVariantId);
+            item.ProductName = variant?.ProductName ?? "";
+            item.Size = variant?.Size ?? "";
+            item.Color = variant?.Color ?? "";
         }
 
         await FillWarehouseOptionsAsync(order);
