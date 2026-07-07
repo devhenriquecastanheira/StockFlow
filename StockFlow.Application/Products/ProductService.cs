@@ -167,4 +167,16 @@ public class ProductService : IProductService
 
         return true;
     }
+
+    public async Task<ProductImage> AddImageAsync(int productId, ProductImage image)
+    {
+        var product = await _productRepository.GetByIdAsync(productId);
+        if (product is null)
+        {
+            throw new ArgumentException($"Product com ID {productId} não encontrado.");
+        }
+        image.ProductId = productId;
+        await _productRepository.AddImageAsync(image);
+        return image;
+    }
 }

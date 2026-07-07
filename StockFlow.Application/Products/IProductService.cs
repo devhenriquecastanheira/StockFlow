@@ -15,4 +15,5 @@ public interface IProductService
     Task<ProductVariantDto> CreateVariantAsync(int productId, ProductVariantDto variant);
     Task<ProductVariantDto> UpdateVariantAsync(int id, ProductVariantDto variant);
     Task<bool> DeleteVariantAsync(int id);
+    Task<ProductImage> AddImageAsync(int productId, ProductImage image);
 }

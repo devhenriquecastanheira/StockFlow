@@ -21,4 +21,8 @@
     <ProjectReference Include="..\StockFlow.Infrastructure\StockFlow.Infrastructure.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="wwwroot\images\" />
+  </ItemGroup>
+
 </Project>

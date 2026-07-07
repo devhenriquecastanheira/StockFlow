@@ -91,4 +91,10 @@ public class ProductRepository : IProductRepository
         _context.ProductVariants.Remove(variant);
         await _context.SaveChangesAsync();
     }
+
+    public async Task AddImageAsync(ProductImage image)
+    {
+        await _context.ProductImages.AddAsync(image);
+        await _context.SaveChangesAsync();
+    }
 }

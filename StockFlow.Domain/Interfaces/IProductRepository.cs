@@ -15,4 +15,5 @@ public interface IProductRepository
     Task AddVariantAsync(ProductVariant variant);
     Task UpdateVariantAsync(ProductVariant variant);
     Task DeleteVariantAsync(ProductVariant variant);
+    Task AddImageAsync(ProductImage image);
 }

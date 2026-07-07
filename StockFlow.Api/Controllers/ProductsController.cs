@@ -12,10 +12,12 @@ namespace StockFlow.Api.Controllers;
 public class ProductsController : ControllerBase
 {
     private readonly IProductService _productService;
+    private readonly IWebHostEnvironment _environment;
 
-    public ProductsController(IProductService productService)
+    public ProductsController(IProductService productService, IWebHostEnvironment environment)
     {
         _productService = productService;
+        _environment = environment;
     }
 
     [HttpGet]
@@ -156,5 +158,33 @@ public class ProductsController : ControllerBase
         }
 
         return NoContent();
+    }
+
+    [HttpPost("images")]
+    public async Task<IActionResult> UploadToCatalog(IFormFile imageFile)
+    {
+        if (imageFile != null && imageFile.Length > 0)
+        {
+            string uniqueFileName = Guid.NewGuid().ToString() + "_" + imageFile.FileName;
+
+            string uploadFolder = Path.Combine(_environment.WebRootPath, "images");
+            string filePath = Path.Combine(uploadFolder, uniqueFileName);
+
+            Directory.CreateDirectory(uploadFolder);
+
+            using (var fileStream = new FileStream(filePath, FileMode.Create))
+            {
+                await imageFile.CopyToAsync(fileStream);
+            }
+
+            var pathString = "/images/" + uniqueFileName;
+            var productImage = new ProductImage
+            {
+                ImageUrl = pathString,
+                IsMain = false
+            };
+            await _productService.AddImageAsync(1, productImage);
+        }
+        return RedirectToAction("Index");
     }
 }
