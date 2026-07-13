@@ -15,5 +15,9 @@ public interface IProductRepository
     Task AddVariantAsync(ProductVariant variant);
     Task UpdateVariantAsync(ProductVariant variant);
     Task DeleteVariantAsync(ProductVariant variant);
+    Task<List<ProductImage>> GetImagesByProductIdAsync(int productId);
+    Task<ProductImage?> GetImageByIdAsync(int productId, int imageId);
     Task AddImageAsync(ProductImage image);
+    Task SetMainImageAsync(int productId, int imageId);
+    Task DeleteImageAsync(ProductImage image);
 }

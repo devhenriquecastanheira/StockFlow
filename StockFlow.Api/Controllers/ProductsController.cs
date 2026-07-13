@@ -160,31 +160,99 @@ public class ProductsController : ControllerBase
         return NoContent();
     }
 
-    [HttpPost("images")]
-    public async Task<IActionResult> UploadToCatalog(IFormFile imageFile)
+    [HttpGet("{productId:int}/images")]
+    [AllowAnonymous]
+    public async Task<ActionResult<List<ProductImage>>> GetImages(int productId)
     {
-        if (imageFile != null && imageFile.Length > 0)
+        var images = await _productService.GetImagesAsync(productId);
+
+        return images is null ? NotFound() : Ok(images);
+    }
+
+    [HttpGet("{productId:int}/images/{imageId:int}")]
+    [AllowAnonymous]
+    public async Task<ActionResult<ProductImage>> GetImage(int productId, int imageId)
+    {
+        var images = await _productService.GetImagesAsync(productId);
+        var image = images?.FirstOrDefault(image => image.Id == imageId);
+
+        return image is null ? NotFound() : Ok(image);
+    }
+
+    [HttpPost("{productId:int}/images")]
+    [Consumes("multipart/form-data")]
+    public async Task<ActionResult<ProductImage>> UploadImage(
+        int productId,
+        IFormFile imageFile,
+        [FromForm] bool isMain = false)
+    {
+        if (imageFile is null || imageFile.Length == 0)
         {
-            string uniqueFileName = Guid.NewGuid().ToString() + "_" + imageFile.FileName;
-
-            string uploadFolder = Path.Combine(_environment.WebRootPath, "images");
-            string filePath = Path.Combine(uploadFolder, uniqueFileName);
-
-            Directory.CreateDirectory(uploadFolder);
-
-            using (var fileStream = new FileStream(filePath, FileMode.Create))
-            {
-                await imageFile.CopyToAsync(fileStream);
-            }
-
-            var pathString = "/images/" + uniqueFileName;
-            var productImage = new ProductImage
-            {
-                ImageUrl = pathString,
-                IsMain = false
-            };
-            await _productService.AddImageAsync(1, productImage);
+            return BadRequest("Envie uma imagem.");
         }
-        return RedirectToAction("Index");
+
+        var extension = Path.GetExtension(imageFile.FileName).ToLowerInvariant();
+        var webRootPath = _environment.WebRootPath ?? Path.Combine(_environment.ContentRootPath, "wwwroot");
+        var uploadFolder = Path.Combine(webRootPath, "images", "products");
+        Directory.CreateDirectory(uploadFolder);
+
+        var fileName = $"{Guid.NewGuid():N}{extension}";
+        var filePath = Path.Combine(uploadFolder, fileName);
+
+        await using (var fileStream = new FileStream(filePath, FileMode.Create))
+        {
+            await imageFile.CopyToAsync(fileStream);
+        }
+
+        var imageUrl = $"/images/products/{fileName}";
+
+        var createdImage = await _productService.AddImageAsync(productId, new ProductImage
+        {
+            ImageUrl = imageUrl,
+            IsMain = isMain
+        });
+
+        if (createdImage is null)
+        {
+            return NotFound();
+        }
+
+        return CreatedAtAction(
+            nameof(GetImage),
+            new { productId, imageId = createdImage.Id },
+            createdImage);
+    }
+
+    [HttpPut("{productId:int}/images/{imageId:int}/main")]
+    public async Task<ActionResult<ProductImage>> SetMainImage(int productId, int imageId)
+    {
+        var image = await _productService.SetMainImageAsync(productId, imageId);
+
+        return image is null ? NotFound() : Ok(image);
+    }
+
+    [HttpDelete("{productId:int}/images/{imageId:int}")]
+    public async Task<IActionResult> DeleteImage(int productId, int imageId)
+    {
+        var image = await _productService.DeleteImageAsync(productId, imageId);
+
+        if (image is null)
+        {
+            return NotFound();
+        }
+
+        if (!string.IsNullOrWhiteSpace(image.ImageUrl))
+        {
+            var webRootPath = _environment.WebRootPath ?? Path.Combine(_environment.ContentRootPath, "wwwroot");
+            var relativePath = image.ImageUrl.TrimStart('/').Replace('/', Path.DirectorySeparatorChar);
+            var filePath = Path.Combine(webRootPath, relativePath);
+
+            if (System.IO.File.Exists(filePath))
+            {
+                System.IO.File.Delete(filePath);
+            }
+        }
+
+        return NoContent();
     }
 }

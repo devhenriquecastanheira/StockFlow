@@ -140,9 +140,14 @@ public class ProductService : IProductService
         return variant;
     }
 
-    public async Task<ProductVariantDto> UpdateVariantAsync(int id, ProductVariantDto variant)
+    public async Task<ProductVariantDto?> UpdateVariantAsync(int id, ProductVariantDto variant)
     {
         var existingVariant = await _productRepository.GetVariantByIdAsync(id);
+
+        if (existingVariant is null)
+        {
+            return null;
+        }
 
         existingVariant.Size = variant.Size;
         existingVariant.Color = variant.Color;
@@ -168,15 +173,80 @@ public class ProductService : IProductService
         return true;
     }
 
-    public async Task<ProductImage> AddImageAsync(int productId, ProductImage image)
+    public async Task<List<ProductImage>?> GetImagesAsync(int productId)
     {
         var product = await _productRepository.GetByIdAsync(productId);
         if (product is null)
         {
-            throw new ArgumentException($"Product com ID {productId} não encontrado.");
+            return null;
         }
+
+        return await _productRepository.GetImagesByProductIdAsync(productId);
+    }
+
+    public async Task<ProductImage?> AddImageAsync(int productId, ProductImage image)
+    {
+        var product = await _productRepository.GetByIdAsync(productId);
+        if (product is null)
+        {
+            return null;
+        }
+
+        var productImages = await _productRepository.GetImagesByProductIdAsync(productId);
+
+        if (!productImages.Any())
+        {
+            image.IsMain = true;
+        }
+
         image.ProductId = productId;
         await _productRepository.AddImageAsync(image);
+
+        if (image.IsMain)
+        {
+            await _productRepository.SetMainImageAsync(productId, image.Id);
+        }
+
+        return image;
+    }
+
+    public async Task<ProductImage?> SetMainImageAsync(int productId, int imageId)
+    {
+        var image = await _productRepository.GetImageByIdAsync(productId, imageId);
+        if (image is null)
+        {
+            return null;
+        }
+
+        await _productRepository.SetMainImageAsync(productId, imageId);
+
+        image.IsMain = true;
+        return image;
+    }
+
+    public async Task<ProductImage?> DeleteImageAsync(int productId, int imageId)
+    {
+        var image = await _productRepository.GetImageByIdAsync(productId, imageId);
+        if (image is null)
+        {
+            return null;
+        }
+
+        var wasMain = image.IsMain;
+
+        await _productRepository.DeleteImageAsync(image);
+
+        if (wasMain)
+        {
+            var remainingImages = await _productRepository.GetImagesByProductIdAsync(productId);
+            var nextMainImage = remainingImages.FirstOrDefault();
+
+            if (nextMainImage is not null)
+            {
+                await _productRepository.SetMainImageAsync(productId, nextMainImage.Id);
+            }
+        }
+
         return image;
     }
 }

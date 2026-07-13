@@ -34,6 +34,9 @@ public class ProductRepository : IProductRepository
     public async Task<List<Product>> GetAllAsync()
     {
         return await _context.Products
+            .Include(product => product.Images
+                .OrderByDescending(image => image.IsMain)
+                .ThenBy(image => image.Id))
             .AsNoTracking()
             .ToListAsync();
     }
@@ -41,6 +44,9 @@ public class ProductRepository : IProductRepository
     public async Task<Product?> GetByIdAsync(int id)
     {
         return await _context.Products
+            .Include(product => product.Images
+                .OrderByDescending(image => image.IsMain)
+                .ThenBy(image => image.Id))
             .FirstOrDefaultAsync(product => product.Id == id);
     }
 
@@ -92,9 +98,44 @@ public class ProductRepository : IProductRepository
         await _context.SaveChangesAsync();
     }
 
+    public async Task<List<ProductImage>> GetImagesByProductIdAsync(int productId)
+    {
+        return await _context.ProductImages
+            .Where(image => image.ProductId == productId)
+            .OrderByDescending(image => image.IsMain)
+            .ThenBy(image => image.Id)
+            .ToListAsync();
+    }
+
+    public async Task<ProductImage?> GetImageByIdAsync(int productId, int imageId)
+    {
+        return await _context.ProductImages
+            .FirstOrDefaultAsync(image => image.ProductId == productId && image.Id == imageId);
+    }
+
     public async Task AddImageAsync(ProductImage image)
     {
         await _context.ProductImages.AddAsync(image);
+        await _context.SaveChangesAsync();
+    }
+
+    public async Task SetMainImageAsync(int productId, int imageId)
+    {
+        var images = await _context.ProductImages
+            .Where(image => image.ProductId == productId)
+            .ToListAsync();
+
+        foreach (var image in images)
+        {
+            image.IsMain = image.Id == imageId;
+        }
+
+        await _context.SaveChangesAsync();
+    }
+
+    public async Task DeleteImageAsync(ProductImage image)
+    {
+        _context.ProductImages.Remove(image);
         await _context.SaveChangesAsync();
     }
 }

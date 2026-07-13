@@ -350,6 +350,12 @@ ASALocalRun/
 # Local History for Visual Studio
 .localhistory/
 
+# Uploaded product images
+StockFlow.Api/wwwroot/images/*
+!StockFlow.Api/wwwroot/images/products/
+StockFlow.Api/wwwroot/images/products/*
+!StockFlow.Api/wwwroot/images/products/.gitkeep
+
 # BeatPulse healthcheck temp database
 healthchecksdb
 

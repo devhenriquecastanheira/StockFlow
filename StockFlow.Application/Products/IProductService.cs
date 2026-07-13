@@ -13,7 +13,10 @@ public interface IProductService
     Task<ProductVariantDto?> GetVariantByIdAsync(int id);
     Task<List<ProductVariantDto>> GetVariantsByProductIdAsync(int productId);
     Task<ProductVariantDto> CreateVariantAsync(int productId, ProductVariantDto variant);
-    Task<ProductVariantDto> UpdateVariantAsync(int id, ProductVariantDto variant);
+    Task<ProductVariantDto?> UpdateVariantAsync(int id, ProductVariantDto variant);
     Task<bool> DeleteVariantAsync(int id);
-    Task<ProductImage> AddImageAsync(int productId, ProductImage image);
+    Task<List<ProductImage>?> GetImagesAsync(int productId);
+    Task<ProductImage?> AddImageAsync(int productId, ProductImage image);
+    Task<ProductImage?> SetMainImageAsync(int productId, int imageId);
+    Task<ProductImage?> DeleteImageAsync(int productId, int imageId);
 }
