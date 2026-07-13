@@ -35,4 +35,7 @@ public class ProductViewModel
 
     [Display(Name = "Variantes")]
     public List<ProductVariantViewModel> Variants { get; set; } = [];
+
+    [Display(Name = "Imagens")]
+    public List<ProductImageViewModel> Images { get; set; } = [];
 }

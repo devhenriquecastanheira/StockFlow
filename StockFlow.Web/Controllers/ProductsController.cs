@@ -26,7 +26,10 @@ public class ProductsController : Controller
         foreach (var product in products)
         {
             product.CategoryName = categories.FirstOrDefault(category => category.Id == product.CategoryId)?.Name ?? "-";
+            product.Images ??= [];
         }
+
+        ViewBag.ApiBaseUrl = _httpClient.BaseAddress?.ToString().TrimEnd('/');
 
         return View(products);
     }
@@ -48,7 +51,14 @@ public class ProductsController : Controller
         response.EnsureSuccessStatusCode();
 
         var product = await response.Content.ReadFromJsonAsync<ProductViewModel>();
+        if (product is null)
+        {
+            return NotFound();
+        }
+
+        product.Images ??= [];
         await FillCategoryNameAsync(product);
+        ViewBag.ApiBaseUrl = _httpClient.BaseAddress?.ToString().TrimEnd('/');
 
         return View(product);
     }
@@ -64,7 +74,6 @@ public class ProductsController : Controller
 
     [Authorize(Roles = "Admin,Operador")]
     [HttpPost]
-    [ValidateAntiForgeryToken]
     public async Task<IActionResult> Create([Bind("Id,Name,Description,CostPrice,SalePrice,CategoryId")] ProductViewModel product)
     {
         if (ModelState.IsValid)
@@ -102,14 +111,20 @@ public class ProductsController : Controller
         response.EnsureSuccessStatusCode();
 
         var product = await response.Content.ReadFromJsonAsync<ProductViewModel>();
+        if (product is null)
+        {
+            return NotFound();
+        }
+
+        product.Images ??= [];
         await FillCategoryOptionsAsync(product);
+        ViewBag.ApiBaseUrl = _httpClient.BaseAddress?.ToString().TrimEnd('/');
 
         return View(product);
     }
 
     [Authorize(Roles = "Admin,Operador")]
     [HttpPost]
-    [ValidateAntiForgeryToken]
     public async Task<IActionResult> Edit(int id, [Bind("Id,Name,Description,CostPrice,SalePrice,CategoryId")] ProductViewModel product)
     {
         if (id != product.Id)
@@ -157,6 +172,12 @@ public class ProductsController : Controller
         response.EnsureSuccessStatusCode();
 
         var product = await response.Content.ReadFromJsonAsync<ProductViewModel>();
+        if (product is null)
+        {
+            return NotFound();
+        }
+
+        product.Images ??= [];
         await FillCategoryNameAsync(product);
 
         return View(product);
@@ -164,7 +185,6 @@ public class ProductsController : Controller
 
     [Authorize(Roles = "Admin,Operador")]
     [HttpPost, ActionName("Delete")]
-    [ValidateAntiForgeryToken]
     public async Task<IActionResult> DeleteConfirmed(int id)
     {
         var response = await _httpClient.DeleteAsync($"api/products/{id}");
@@ -177,6 +197,49 @@ public class ProductsController : Controller
         response.EnsureSuccessStatusCode();
 
         return RedirectToAction(nameof(Index));
+    }
+
+    [Authorize(Roles = "Admin,Operador")]
+    [HttpPost]
+    public async Task<IActionResult> UploadImage(int productId, IFormFile imageFile, bool isMain = false)
+    {
+        if (imageFile is null || imageFile.Length == 0)
+        {
+            return RedirectToAction(nameof(Details), new { id = productId });
+        }
+
+        using var content = new MultipartFormDataContent();
+        using var fileContent = new StreamContent(imageFile.OpenReadStream());
+
+        content.Add(fileContent, "imageFile", imageFile.FileName);
+        content.Add(new StringContent(isMain.ToString().ToLowerInvariant()), "isMain");
+
+        var response = await _httpClient.PostAsync($"api/products/{productId}/images", content);
+
+        if (!response.IsSuccessStatusCode)
+        {
+            TempData["Error"] = await response.Content.ReadAsStringAsync();
+        }
+
+        return RedirectToAction(nameof(Details), new { id = productId });
+    }
+
+    [Authorize(Roles = "Admin,Operador")]
+    [HttpPost]
+    public async Task<IActionResult> SetMainImage(int productId, int imageId)
+    {
+        await _httpClient.PutAsync($"api/products/{productId}/images/{imageId}/main", null);
+
+        return RedirectToAction(nameof(Details), new { id = productId });
+    }
+
+    [Authorize(Roles = "Admin,Operador")]
+    [HttpPost]
+    public async Task<IActionResult> DeleteImage(int productId, int imageId)
+    {
+        await _httpClient.DeleteAsync($"api/products/{productId}/images/{imageId}");
+
+        return RedirectToAction(nameof(Details), new { id = productId });
     }
 
     private async Task FillCategoryOptionsAsync(ProductViewModel? product)

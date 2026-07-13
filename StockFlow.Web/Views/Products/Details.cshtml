@@ -2,9 +2,16 @@
 
 @{
     ViewData["Title"] = "Detalhes";
+    var apiBaseUrl = ViewBag.ApiBaseUrl as string ?? string.Empty;
+    var images = Model.Images ?? [];
 }
 
 <h1>Detalhes</h1>
+
+@if (TempData["Error"] is not null)
+{
+    <div class="alert alert-danger">@TempData["Error"]</div>
+}
 
 <div>
     <h4>Produto</h4>
@@ -25,6 +32,56 @@
         <dd class="col-sm-10">@Model.SalePrice.ToString("C")</dd>
     </dl>
 </div>
+
+<div class="mb-3">
+    <h4>Imagens</h4>
+
+    @if (User.IsInRole("Admin") || User.IsInRole("Operador"))
+    {
+        <form asp-action="UploadImage" method="post" enctype="multipart/form-data" class="mb-3">
+            <input type="hidden" name="productId" value="@Model.Id" />
+            <input type="file" name="imageFile" class="form-control mb-2" />
+            <div class="form-check mb-2">
+                <input type="checkbox" name="isMain" value="true" class="form-check-input" id="isMain" />
+                <label class="form-check-label" for="isMain">Imagem principal</label>
+            </div>
+            <button type="submit" class="btn btn-primary">Enviar imagem</button>
+        </form>
+    }
+
+    @if (images.Count == 0)
+    {
+        <p>Nenhuma imagem cadastrada.</p>
+    }
+    else
+    {
+        <div class="row">
+            @foreach (var image in images)
+            {
+                <div class="col-md-3 mb-3">
+                    <img src="@(apiBaseUrl + image.ImageUrl)" alt="@Model.Name" class="img-fluid mb-2" />
+                    <div>@(image.IsMain ? "Principal" : "Imagem")</div>
+
+                    @if (User.IsInRole("Admin") || User.IsInRole("Operador"))
+                    {
+                        <form asp-action="SetMainImage" method="post" class="d-inline">
+                            <input type="hidden" name="productId" value="@Model.Id" />
+                            <input type="hidden" name="imageId" value="@image.Id" />
+                            <button type="submit" class="btn btn-sm btn-secondary">Principal</button>
+                        </form>
+
+                        <form asp-action="DeleteImage" method="post" class="d-inline">
+                            <input type="hidden" name="productId" value="@Model.Id" />
+                            <input type="hidden" name="imageId" value="@image.Id" />
+                            <button type="submit" class="btn btn-sm btn-danger">Excluir</button>
+                        </form>
+                    }
+                </div>
+            }
+        </div>
+    }
+</div>
+
 <div>
     @if (User.IsInRole("Admin") || User.IsInRole("Operador"))
     {
