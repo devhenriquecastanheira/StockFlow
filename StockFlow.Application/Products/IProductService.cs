@@ -5,6 +5,7 @@ namespace StockFlow.Application.Products;
 public interface IProductService
 {
     Task<List<Product>> GetAllAsync();
+    Task<List<Product>> GetByTagIdAsync(int tagId);
     Task<Product?> GetByIdAsync(int id);
     Task<Product> CreateAsync(Product product);
     Task<Product?> UpdateAsync(int id, Product product);
@@ -19,4 +20,7 @@ public interface IProductService
     Task<ProductImage?> AddImageAsync(int productId, ProductImage image);
     Task<ProductImage?> SetMainImageAsync(int productId, int imageId);
     Task<ProductImage?> DeleteImageAsync(int productId, int imageId);
+    Task<List<Tag>?> GetTagsByProductIdAsync(int productId);
+    Task<Tag?> AddTagAsync(int productId, int tagId);
+    Task<bool> RemoveTagAsync(int productId, int tagId);
 }

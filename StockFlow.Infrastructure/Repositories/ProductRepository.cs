@@ -41,6 +41,18 @@ public class ProductRepository : IProductRepository
             .ToListAsync();
     }
 
+    public async Task<List<Product>> GetByTagIdAsync(int tagId)
+    {
+        return await _context.Products
+            .Include(product => product.Images
+                .OrderByDescending(image => image.IsMain)
+                .ThenBy(image => image.Id))
+            .Where(product => product.ProductTags
+                .Any(productTag => productTag.TagId == tagId))
+            .AsNoTracking()
+            .ToListAsync();
+    }
+
     public async Task<Product?> GetByIdAsync(int id)
     {
         return await _context.Products
@@ -137,5 +149,34 @@ public class ProductRepository : IProductRepository
     {
         _context.ProductImages.Remove(image);
         await _context.SaveChangesAsync();
+    }
+
+    public async Task<ProductTag?> GetProductTagAsync(int productId, int tagId)
+    {
+        return await _context.ProductTags
+            .FirstOrDefaultAsync(productTag =>
+                productTag.ProductId == productId &&
+                productTag.TagId == tagId);
+    }
+
+    public async Task AddProductTagAsync(ProductTag productTag)
+    {
+        await _context.ProductTags.AddAsync(productTag);
+        await _context.SaveChangesAsync();
+    }
+
+    public async Task DeleteProductTagAsync(ProductTag productTag)
+    {
+        _context.ProductTags.Remove(productTag);
+        await _context.SaveChangesAsync();
+    }
+
+    public async Task<List<Tag>> GetTagsByProductIdAsync(int productId)
+    {
+        return await _context.ProductTags
+            .Where(productTag => productTag.ProductId == productId)
+            .Select(productTag => productTag.Tag)
+            .AsNoTracking()
+            .ToListAsync();
     }
 }

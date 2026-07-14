@@ -10,6 +10,7 @@ using StockFlow.Application.Products;
 using StockFlow.Application.PurchaseOrders;
 using StockFlow.Application.Stock;
 using StockFlow.Application.Suppliers;
+using StockFlow.Application.Tags;
 using StockFlow.Application.Warehouses;
 using StockFlow.Domain.Entities;
 using StockFlow.Domain.Interfaces;
@@ -58,6 +59,9 @@ builder.Services.AddScoped<IAuthService, AuthService>();
 
 builder.Services.AddScoped<ICustomerRepository, CustomerRepository>();
 builder.Services.AddScoped<ICustomerService, CustomerService>();
+
+builder.Services.AddScoped<ITagRepository, TagRepository>();
+builder.Services.AddScoped<ITagService, TagService>();
 
 builder.Services
     .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)

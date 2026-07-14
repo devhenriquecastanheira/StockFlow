@@ -5,6 +5,7 @@ namespace StockFlow.Domain.Interfaces;
 public interface IProductRepository
 {
     Task<List<Product>> GetAllAsync();
+    Task<List<Product>> GetByTagIdAsync(int tagId);
     Task<Product?> GetByIdAsync(int id);
     Task AddAsync(Product product);
     Task UpdateAsync(Product product);
@@ -20,4 +21,8 @@ public interface IProductRepository
     Task AddImageAsync(ProductImage image);
     Task SetMainImageAsync(int productId, int imageId);
     Task DeleteImageAsync(ProductImage image);
+    Task<ProductTag?> GetProductTagAsync(int productId, int tagId);
+    Task AddProductTagAsync(ProductTag productTag);
+    Task DeleteProductTagAsync(ProductTag productTag);
+    Task<List<Tag>> GetTagsByProductIdAsync(int productId);
 }

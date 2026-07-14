@@ -29,6 +29,15 @@ public class ProductsController : ControllerBase
         return Ok(products);
     }
 
+    [HttpGet("by-tag/{tagId:int}")]
+    [AllowAnonymous]
+    public async Task<ActionResult<List<Product>>> GetByTagId(int tagId)
+    {
+        var products = await _productService.GetByTagIdAsync(tagId);
+
+        return Ok(products);
+    }
+
     [HttpGet("{id:int}")]
     [AllowAnonymous]
     public async Task<ActionResult<Product>> GetById(int id)
@@ -251,6 +260,36 @@ public class ProductsController : ControllerBase
             {
                 System.IO.File.Delete(filePath);
             }
+        }
+
+        return NoContent();
+    }
+
+    [HttpGet("{productId:int}/tags")]
+    [AllowAnonymous]
+    public async Task<ActionResult<List<Tag>>> GetTagsByProductId(int productId)
+    {
+        var tags = await _productService.GetTagsByProductIdAsync(productId);
+
+        return tags is null ? NotFound() : Ok(tags);
+    }
+
+    [HttpPost("{productId:int}/tags/{tagId:int}")]
+    public async Task<ActionResult<Tag>> AddTag(int productId, int tagId)
+    {
+        var tag = await _productService.AddTagAsync(productId, tagId);
+
+        return tag is null ? NotFound() : Ok(tag);
+    }
+
+    [HttpDelete("{productId:int}/tags/{tagId:int}")]
+    public async Task<IActionResult> RemoveTag(int productId, int tagId)
+    {
+        var removed = await _productService.RemoveTagAsync(productId, tagId);
+
+        if (!removed)
+        {
+            return NotFound();
         }
 
         return NoContent();

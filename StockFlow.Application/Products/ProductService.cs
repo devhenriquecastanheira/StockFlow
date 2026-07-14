@@ -7,19 +7,27 @@ namespace StockFlow.Application.Products;
 public class ProductService : IProductService
 {
     private readonly IProductRepository _productRepository;
+    private readonly ITagRepository _tagRepository;
     private readonly IValidator<Product> _productValidator;
 
     public ProductService(
         IProductRepository productRepository,
+        ITagRepository tagRepository,
         IValidator<Product> productValidator)
     {
         _productRepository = productRepository;
+        _tagRepository = tagRepository;
         _productValidator = productValidator;
     }
 
     public async Task<List<Product>> GetAllAsync()
     {
         return await _productRepository.GetAllAsync();
+    }
+
+    public async Task<List<Product>> GetByTagIdAsync(int tagId)
+    {
+        return await _productRepository.GetByTagIdAsync(tagId);
     }
 
     public async Task<Product?> GetByIdAsync(int id)
@@ -248,5 +256,65 @@ public class ProductService : IProductService
         }
 
         return image;
+    }
+
+    public async Task<List<Tag>?> GetTagsByProductIdAsync(int productId)
+    {
+        var product = await _productRepository.GetByIdAsync(productId);
+
+        if (product is null)
+        {
+            return null;
+        }
+
+        return await _productRepository.GetTagsByProductIdAsync(productId);
+    }
+
+    public async Task<Tag?> AddTagAsync(int productId, int tagId)
+    {
+        var product = await _productRepository.GetByIdAsync(productId);
+
+        if (product is null)
+        {
+            return null;
+        }
+
+        var tag = await _tagRepository.GetByIdAsync(tagId);
+
+        if (tag is null)
+        {
+            return null;
+        }
+
+        var existingProductTag = await _productRepository.GetProductTagAsync(productId, tagId);
+
+        if (existingProductTag is null)
+        {
+            await _productRepository.AddProductTagAsync(new ProductTag
+            {
+                ProductId = productId,
+                TagId = tagId
+            });
+        }
+
+        return new Tag
+        {
+            Id = tag.Id,
+            Name = tag.Name
+        };
+    }
+
+    public async Task<bool> RemoveTagAsync(int productId, int tagId)
+    {
+        var productTag = await _productRepository.GetProductTagAsync(productId, tagId);
+
+        if (productTag is null)
+        {
+            return false;
+        }
+
+        await _productRepository.DeleteProductTagAsync(productTag);
+
+        return true;
     }
 }
