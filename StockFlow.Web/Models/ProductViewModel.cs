@@ -38,4 +38,9 @@ public class ProductViewModel
 
     [Display(Name = "Imagens")]
     public List<ProductImageViewModel> Images { get; set; } = [];
+
+    [Display(Name = "Tags")]
+    public List<TagViewModel> Tags { get; set; } = [];
+
+    public List<SelectListItem> TagOptions { get; set; } = [];
 }

@@ -27,6 +27,7 @@ public class ProductsController : Controller
         {
             product.CategoryName = categories.FirstOrDefault(category => category.Id == product.CategoryId)?.Name ?? "-";
             product.Images ??= [];
+            product.Tags = await GetProductTagsAsync(product.Id);
         }
 
         ViewBag.ApiBaseUrl = _httpClient.BaseAddress?.ToString().TrimEnd('/');
@@ -57,7 +58,9 @@ public class ProductsController : Controller
         }
 
         product.Images ??= [];
+        product.Tags = await GetProductTagsAsync(product.Id);
         await FillCategoryNameAsync(product);
+        await FillTagOptionsAsync(product);
         ViewBag.ApiBaseUrl = _httpClient.BaseAddress?.ToString().TrimEnd('/');
 
         return View(product);
@@ -242,6 +245,40 @@ public class ProductsController : Controller
         return RedirectToAction(nameof(Details), new { id = productId });
     }
 
+    [Authorize(Roles = "Admin,Operador")]
+    [HttpPost]
+    public async Task<IActionResult> AddTag(int productId, int? tagId)
+    {
+        if (!tagId.HasValue)
+        {
+            TempData["Error"] = "Selecione uma tag.";
+            return RedirectToAction(nameof(Details), new { id = productId });
+        }
+
+        var response = await _httpClient.PostAsync($"api/products/{productId}/tags/{tagId.Value}", null);
+
+        if (!response.IsSuccessStatusCode)
+        {
+            TempData["Error"] = "Não foi possível adicionar a tag ao produto.";
+        }
+
+        return RedirectToAction(nameof(Details), new { id = productId });
+    }
+
+    [Authorize(Roles = "Admin,Operador")]
+    [HttpPost]
+    public async Task<IActionResult> RemoveTag(int productId, int tagId)
+    {
+        var response = await _httpClient.DeleteAsync($"api/products/{productId}/tags/{tagId}");
+
+        if (!response.IsSuccessStatusCode)
+        {
+            TempData["Error"] = "Não foi possível remover a tag do produto.";
+        }
+
+        return RedirectToAction(nameof(Details), new { id = productId });
+    }
+
     private async Task FillCategoryOptionsAsync(ProductViewModel? product)
     {
         if (product is null)
@@ -270,6 +307,45 @@ public class ProductsController : Controller
     {
         return await _httpClient.GetFromJsonAsync<List<CategoryViewModel>>("api/categories")
             ?? [];
+    }
+
+    private async Task<List<TagViewModel>> GetTagsAsync()
+    {
+        return await _httpClient.GetFromJsonAsync<List<TagViewModel>>("api/tags")
+            ?? [];
+    }
+
+    private async Task<List<TagViewModel>> GetProductTagsAsync(int productId)
+    {
+        var response = await _httpClient.GetAsync($"api/products/{productId}/tags");
+
+        if (response.StatusCode == HttpStatusCode.NotFound)
+        {
+            return [];
+        }
+
+        response.EnsureSuccessStatusCode();
+
+        return await response.Content.ReadFromJsonAsync<List<TagViewModel>>()
+            ?? [];
+    }
+
+    private async Task FillTagOptionsAsync(ProductViewModel? product)
+    {
+        if (product is null)
+        {
+            return;
+        }
+
+        var tags = await GetTagsAsync();
+        var productTagIds = product.Tags
+            .Select(tag => tag.Id)
+            .ToHashSet();
+
+        product.TagOptions = tags
+            .Where(tag => !productTagIds.Contains(tag.Id))
+            .Select(tag => new SelectListItem(tag.Name, tag.Id.ToString()))
+            .ToList();
     }
 
 }

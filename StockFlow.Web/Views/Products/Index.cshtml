@@ -32,6 +32,7 @@ else
                 <th>Imagem</th>
                 <th>Nome</th>
                 <th>Categoria</th>
+                <th>Tags</th>
                 @if (User.IsInRole("Admin") || User.IsInRole("Operador"))
                 {
                     <th>Preço de custo</th>
@@ -59,6 +60,19 @@ else
                     </td>
                     <td class="fw-medium">@product.Name</td>
                     <td class="text-secondary">@product.CategoryName</td>
+                    <td>
+                        @if (product.Tags.Count == 0)
+                        {
+                            <span class="text-secondary">-</span>
+                        }
+                        else
+                        {
+                            foreach (var tag in product.Tags)
+                            {
+                                <span class="badge text-bg-secondary me-1">@tag.Name</span>
+                            }
+                        }
+                    </td>
                     @if (User.IsInRole("Admin") || User.IsInRole("Operador"))
                     {
                         <td>@product.CostPrice.ToString("C")</td>

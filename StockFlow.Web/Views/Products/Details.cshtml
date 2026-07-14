@@ -34,6 +34,56 @@
 </div>
 
 <div class="mb-3">
+    <h4>Tags</h4>
+
+    @if (Model.Tags.Count == 0)
+    {
+        <p>Nenhuma tag associada.</p>
+    }
+    else
+    {
+        <div class="mb-3">
+            @foreach (var tag in Model.Tags)
+            {
+                <span class="badge text-bg-secondary me-1 mb-1">@tag.Name</span>
+
+                @if (User.IsInRole("Admin") || User.IsInRole("Operador"))
+                {
+                    <form asp-action="RemoveTag" method="post" class="d-inline">
+                        <input type="hidden" name="productId" value="@Model.Id" />
+                        <input type="hidden" name="tagId" value="@tag.Id" />
+                        <button type="submit" class="btn btn-sm btn-outline-danger me-2 mb-1">Remover</button>
+                    </form>
+                }
+            }
+        </div>
+    }
+
+    @if (User.IsInRole("Admin") || User.IsInRole("Operador"))
+    {
+        @if (Model.TagOptions.Count == 0)
+        {
+            <p class="text-secondary">Não há tags disponíveis para adicionar.</p>
+        }
+        else
+        {
+            <form asp-action="AddTag" method="post" class="row g-2 align-items-end">
+                <input type="hidden" name="productId" value="@Model.Id" />
+                <div class="col-md-4">
+                    <label for="tagId" class="form-label">Adicionar tag</label>
+                    <select id="tagId" name="tagId" asp-items="Model.TagOptions" class="form-select">
+                        <option value="">Selecione</option>
+                    </select>
+                </div>
+                <div class="col-md-auto">
+                    <button type="submit" class="btn btn-primary">Adicionar</button>
+                </div>
+            </form>
+        }
+    }
+</div>
+
+<div class="mb-3">
     <h4>Imagens</h4>
 
     @if (User.IsInRole("Admin") || User.IsInRole("Operador"))
