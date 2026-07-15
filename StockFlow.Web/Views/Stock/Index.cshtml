@@ -1,7 +1,16 @@
+@using System.Text.Json
 @model IReadOnlyList<StockItemViewModel>
 
 @{
     ViewData["Title"] = "Estoque";
+
+    var chartLabels = Model
+        .Select(item => $"{item.ProductVariant?.Sku ?? item.ProductVariantId.ToString()} - {item.Warehouse?.Name ?? item.WarehouseId.ToString()}")
+        .ToList();
+
+    var chartData = Model
+        .Select(item => item.Quantity)
+        .ToList();
 }
 
 <h1>Estoque</h1>
@@ -9,7 +18,13 @@
 <p>
     <a asp-action="Create">Nova movimentação</a>
 </p>
-
+@if (Model.Count > 0)
+{
+    <div class="mb-4">
+        <h2 class="h5">Quantidade em estoque</h2>
+        <canvas id="stockChart"></canvas>
+    </div>
+}
 @if (Model.Count == 0)
 {
     <p>Nenhum item em estoque.</p>
@@ -55,4 +70,24 @@ else
             }
         </tbody>
     </table>
+}
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <script>
+        const labels = @Html.Raw(JsonSerializer.Serialize(chartLabels));
+        const data = @Html.Raw(JsonSerializer.Serialize(chartData));
+
+        new Chart(document.getElementById('stockChart'), {
+            type: 'bar',
+            data: {
+                labels,
+                datasets: [{
+                    label: 'Quantidade',
+                    data
+                }]
+            }
+        });
+    </script>
 }
