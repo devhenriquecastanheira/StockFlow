@@ -22,6 +22,8 @@ public class OrderRepository : IOrderRepository
     public async Task<List<Order>> GetAllAsync()
     {
         return await _context.Orders
+            .Include(order => order.CustomerProfile)
+            .ThenInclude(profile => profile!.User)
             .Include(order => order.Items)
             .ThenInclude(item => item.ProductVariant)
             .ThenInclude(variant => variant.Product)
@@ -31,6 +33,8 @@ public class OrderRepository : IOrderRepository
     public async Task<Order?> GetByIdAsync(int id)
     {
         return await _context.Orders
+            .Include(order => order.CustomerProfile)
+            .ThenInclude(profile => profile!.User)
             .Include(order => order.Items)
             .ThenInclude(item => item.ProductVariant)
             .ThenInclude(variant => variant.Product)

@@ -22,6 +22,53 @@ namespace StockFlow.Infrastructure.Data.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
+            modelBuilder.Entity("StockFlow.Domain.Entities.Cart", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("CustomerProfileId")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CustomerProfileId");
+
+                    b.ToTable("Carts");
+                });
+
+            modelBuilder.Entity("StockFlow.Domain.Entities.CartItem", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("CartId")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("ProductVariantId")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("Quantity")
+                        .HasColumnType("integer");
+
+                    b.Property<decimal>("UnitPrice")
+                        .HasColumnType("numeric");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CartId");
+
+                    b.HasIndex("ProductVariantId");
+
+                    b.ToTable("CartItems");
+                });
+
             modelBuilder.Entity("StockFlow.Domain.Entities.Category", b =>
                 {
                     b.Property<int>("Id")
@@ -96,6 +143,38 @@ namespace StockFlow.Infrastructure.Data.Migrations
                     b.ToTable("CustomerProfiles");
                 });
 
+            modelBuilder.Entity("StockFlow.Domain.Entities.Invoice", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("IssuedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Number")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<int>("OrderId")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("PdfPath")
+                        .HasColumnType("text");
+
+                    b.Property<decimal>("TotalAmount")
+                        .HasColumnType("numeric");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("OrderId")
+                        .IsUnique();
+
+                    b.ToTable("Invoices");
+                });
+
             modelBuilder.Entity("StockFlow.Domain.Entities.Order", b =>
                 {
                     b.Property<int>("Id")
@@ -115,10 +194,36 @@ namespace StockFlow.Infrastructure.Data.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
+                    b.Property<int>("CustomerProfileId")
+                        .HasColumnType("integer");
+
+                    b.Property<int?>("DeliveryAddressId")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("DeliveryCity")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("DeliveryNumber")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("DeliveryState")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("DeliveryStreet")
+                        .IsRequired()
+                        .HasColumnType("text");
+
                     b.Property<int>("Status")
                         .HasColumnType("integer");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("CustomerProfileId");
+
+                    b.HasIndex("DeliveryAddressId");
 
                     b.ToTable("Orders");
                 });
@@ -547,6 +652,36 @@ namespace StockFlow.Infrastructure.Data.Migrations
                     b.ToTable("Warehouses");
                 });
 
+            modelBuilder.Entity("StockFlow.Domain.Entities.Cart", b =>
+                {
+                    b.HasOne("StockFlow.Domain.Entities.CustomerProfile", "CustomerProfile")
+                        .WithMany("Carts")
+                        .HasForeignKey("CustomerProfileId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("CustomerProfile");
+                });
+
+            modelBuilder.Entity("StockFlow.Domain.Entities.CartItem", b =>
+                {
+                    b.HasOne("StockFlow.Domain.Entities.Cart", "Cart")
+                        .WithMany("Items")
+                        .HasForeignKey("CartId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("StockFlow.Domain.Entities.ProductVariant", "ProductVariant")
+                        .WithMany()
+                        .HasForeignKey("ProductVariantId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Cart");
+
+                    b.Navigation("ProductVariant");
+                });
+
             modelBuilder.Entity("StockFlow.Domain.Entities.CustomerAddress", b =>
                 {
                     b.HasOne("StockFlow.Domain.Entities.CustomerProfile", "CustomerProfile")
@@ -567,6 +702,33 @@ namespace StockFlow.Infrastructure.Data.Migrations
                         .IsRequired();
 
                     b.Navigation("User");
+                });
+
+            modelBuilder.Entity("StockFlow.Domain.Entities.Invoice", b =>
+                {
+                    b.HasOne("StockFlow.Domain.Entities.Order", "Order")
+                        .WithOne("Invoice")
+                        .HasForeignKey("StockFlow.Domain.Entities.Invoice", "OrderId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Order");
+                });
+
+            modelBuilder.Entity("StockFlow.Domain.Entities.Order", b =>
+                {
+                    b.HasOne("StockFlow.Domain.Entities.CustomerProfile", "CustomerProfile")
+                        .WithMany("Orders")
+                        .HasForeignKey("CustomerProfileId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("StockFlow.Domain.Entities.CustomerAddress", null)
+                        .WithMany()
+                        .HasForeignKey("DeliveryAddressId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.Navigation("CustomerProfile");
                 });
 
             modelBuilder.Entity("StockFlow.Domain.Entities.OrderItem", b =>
@@ -765,6 +927,11 @@ namespace StockFlow.Infrastructure.Data.Migrations
                     b.Navigation("ToWarehouse");
                 });
 
+            modelBuilder.Entity("StockFlow.Domain.Entities.Cart", b =>
+                {
+                    b.Navigation("Items");
+                });
+
             modelBuilder.Entity("StockFlow.Domain.Entities.Category", b =>
                 {
                     b.Navigation("Products");
@@ -773,10 +940,16 @@ namespace StockFlow.Infrastructure.Data.Migrations
             modelBuilder.Entity("StockFlow.Domain.Entities.CustomerProfile", b =>
                 {
                     b.Navigation("Addresses");
+
+                    b.Navigation("Carts");
+
+                    b.Navigation("Orders");
                 });
 
             modelBuilder.Entity("StockFlow.Domain.Entities.Order", b =>
                 {
+                    b.Navigation("Invoice");
+
                     b.Navigation("Items");
                 });
 

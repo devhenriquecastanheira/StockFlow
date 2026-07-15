@@ -1,9 +1,11 @@
 using FluentValidation;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using StockFlow.Application.Customers;
 using StockFlow.Application.Orders;
 using StockFlow.Domain.Entities;
 using StockFlow.Domain.Enums;
+using System.Security.Claims;
 
 namespace StockFlow.Api.Controllers;
 
@@ -12,10 +14,12 @@ namespace StockFlow.Api.Controllers;
 public class OrdersController : ControllerBase
 {
     private readonly IOrderService _orderService;
+    private readonly ICustomerService _customerService;
 
-    public OrdersController(IOrderService orderService)
+    public OrdersController(IOrderService orderService, ICustomerService customerService)
     {
         _orderService = orderService;
+        _customerService = customerService;
     }
 
     [HttpGet]
@@ -42,6 +46,37 @@ public class OrdersController : ControllerBase
     [Authorize(Roles = "Admin,Operador,Cliente")]
     public async Task<ActionResult<Order>> Create(Order order)
     {
+        if (User.IsInRole("Cliente"))
+        {
+            var userId = GetCurrentUserId();
+            if (userId is null)
+            {
+                return Unauthorized();
+            }
+
+            var profile = await _customerService.GetProfileAsync(userId.Value);
+            if (profile is null)
+            {
+                return Unauthorized();
+            }
+
+            order.CustomerProfileId = profile.Id;
+            order.CustomerName = profile.User.Name;
+            order.CustomerEmail = profile.User.Email;
+
+            var address = profile.Addresses.FirstOrDefault(address => address.Id == order.DeliveryAddressId)
+                ?? profile.Addresses.FirstOrDefault();
+
+            if (address is not null)
+            {
+                order.DeliveryAddressId = address.Id;
+                order.DeliveryStreet = address.Street;
+                order.DeliveryNumber = address.Number;
+                order.DeliveryCity = address.City;
+                order.DeliveryState = address.State;
+            }
+        }
+
         var createdOrder = await _orderService.AddOrderAsync(order);
         return CreatedAtAction(nameof(GetById), new { id = createdOrder.Id }, createdOrder);
     }
@@ -129,5 +164,11 @@ public class OrdersController : ControllerBase
         {
             return BadRequest(ex.Message);
         }
+    }
+
+    private int? GetCurrentUserId()
+    {
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        return int.TryParse(userId, out var value) ? value : null;
     }
 }

@@ -1,4 +1,4 @@
-﻿using FluentValidation;
+using FluentValidation;
 using StockFlow.Application.Stock;
 using StockFlow.Domain.Entities;
 using StockFlow.Domain.Enums;
@@ -29,8 +29,14 @@ public class OrderService : IOrderService
         return orders.Select(order => new OrderDto
         {
             Id = order.Id,
+            CustomerProfileId = order.CustomerProfileId,
             CustomerName = order.CustomerName,
             CustomerEmail = order.CustomerEmail,
+            DeliveryAddressId = order.DeliveryAddressId,
+            DeliveryStreet = order.DeliveryStreet,
+            DeliveryNumber = order.DeliveryNumber,
+            DeliveryCity = order.DeliveryCity,
+            DeliveryState = order.DeliveryState,
             CreatedAt = order.CreatedAt,
             Status = order.Status,
             Items = order.Items.Select(item => new OrderItemDto
@@ -58,8 +64,14 @@ public class OrderService : IOrderService
         return new OrderDto
         {
             Id = order.Id,
+            CustomerProfileId = order.CustomerProfileId,
             CustomerName = order.CustomerName,
             CustomerEmail = order.CustomerEmail,
+            DeliveryAddressId = order.DeliveryAddressId,
+            DeliveryStreet = order.DeliveryStreet,
+            DeliveryNumber = order.DeliveryNumber,
+            DeliveryCity = order.DeliveryCity,
+            DeliveryState = order.DeliveryState,
             CreatedAt = order.CreatedAt,
             Status = order.Status,
             Items = order.Items.Select(item => new OrderItemDto
@@ -97,16 +109,28 @@ public class OrderService : IOrderService
             return null;
         }
 
+        existingOrder.CustomerProfileId = order.CustomerProfileId;
         existingOrder.CustomerName = order.CustomerName;
         existingOrder.CustomerEmail = order.CustomerEmail;
+        existingOrder.DeliveryAddressId = order.DeliveryAddressId;
+        existingOrder.DeliveryStreet = order.DeliveryStreet;
+        existingOrder.DeliveryNumber = order.DeliveryNumber;
+        existingOrder.DeliveryCity = order.DeliveryCity;
+        existingOrder.DeliveryState = order.DeliveryState;
 
         await _orderRepository.UpdateAsync(existingOrder);
 
         return new OrderDto
         {
             Id = existingOrder.Id,
+            CustomerProfileId = existingOrder.CustomerProfileId,
             CustomerName = existingOrder.CustomerName,
             CustomerEmail = existingOrder.CustomerEmail,
+            DeliveryAddressId = existingOrder.DeliveryAddressId,
+            DeliveryStreet = existingOrder.DeliveryStreet,
+            DeliveryNumber = existingOrder.DeliveryNumber,
+            DeliveryCity = existingOrder.DeliveryCity,
+            DeliveryState = existingOrder.DeliveryState,
             CreatedAt = existingOrder.CreatedAt,
             Status = existingOrder.Status,
             Items = existingOrder.Items.Select(item => new OrderItemDto
@@ -148,8 +172,14 @@ public class OrderService : IOrderService
         return new OrderDto
         {
             Id = order.Id,
+            CustomerProfileId = order.CustomerProfileId,
             CustomerName = order.CustomerName,
             CustomerEmail = order.CustomerEmail,
+            DeliveryAddressId = order.DeliveryAddressId,
+            DeliveryStreet = order.DeliveryStreet,
+            DeliveryNumber = order.DeliveryNumber,
+            DeliveryCity = order.DeliveryCity,
+            DeliveryState = order.DeliveryState,
             CreatedAt = order.CreatedAt,
             Status = order.Status,
             Items = order.Items.Select(item => new OrderItemDto
@@ -192,8 +222,14 @@ public class OrderService : IOrderService
         return new OrderDto
         {
             Id = updatedOrder.Id,
+            CustomerProfileId = updatedOrder.CustomerProfileId,
             CustomerName = updatedOrder.CustomerName,
             CustomerEmail = updatedOrder.CustomerEmail,
+            DeliveryAddressId = updatedOrder.DeliveryAddressId,
+            DeliveryStreet = updatedOrder.DeliveryStreet,
+            DeliveryNumber = updatedOrder.DeliveryNumber,
+            DeliveryCity = updatedOrder.DeliveryCity,
+            DeliveryState = updatedOrder.DeliveryState,
             CreatedAt = updatedOrder.CreatedAt,
             Status = updatedOrder.Status,
             Items = updatedOrder.Items.Select(item => new OrderItemDto
@@ -247,9 +283,9 @@ public class OrderService : IOrderService
         foreach (var item in order.Items)
         {
             await _stockService.RegisterExitAcrossWarehousesAsync(
-            item.ProductVariantId,
-            item.Quantity,
-            $"Pedido #{order.Id} foi confirmado");
+                item.ProductVariantId,
+                item.Quantity,
+                $"Pedido #{order.Id} foi confirmado");
         }
 
         order.Status = OrderStatus.Confirmed;
@@ -258,8 +294,14 @@ public class OrderService : IOrderService
         return new OrderDto
         {
             Id = order.Id,
+            CustomerProfileId = order.CustomerProfileId,
             CustomerName = order.CustomerName,
             CustomerEmail = order.CustomerEmail,
+            DeliveryAddressId = order.DeliveryAddressId,
+            DeliveryStreet = order.DeliveryStreet,
+            DeliveryNumber = order.DeliveryNumber,
+            DeliveryCity = order.DeliveryCity,
+            DeliveryState = order.DeliveryState,
             CreatedAt = order.CreatedAt,
             Status = order.Status,
             Items = order.Items.Select(item => new OrderItemDto

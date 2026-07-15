@@ -54,10 +54,17 @@ public class OrdersController : Controller
         }
 
         var profile = await GetCustomerProfileAsync();
+        var address = profile?.Addresses.FirstOrDefault();
         var order = new OrderViewModel
         {
+            CustomerProfileId = profile?.Id ?? 0,
             CustomerName = profile?.User.Name ?? User.Identity?.Name ?? string.Empty,
-            CustomerEmail = profile?.User.Email ?? string.Empty
+            CustomerEmail = profile?.User.Email ?? string.Empty,
+            DeliveryAddressId = address?.Id,
+            DeliveryStreet = address?.Street ?? string.Empty,
+            DeliveryNumber = address?.Number ?? string.Empty,
+            DeliveryCity = address?.City ?? string.Empty,
+            DeliveryState = address?.State ?? string.Empty
         };
 
         return View(order);
@@ -65,7 +72,7 @@ public class OrdersController : Controller
 
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Create([Bind("Id,CustomerName,CustomerEmail,Status")] OrderViewModel order)
+    public async Task<IActionResult> Create([Bind("Id,CustomerName,CustomerEmail,Status,DeliveryAddressId,DeliveryStreet,DeliveryNumber,DeliveryCity,DeliveryState")] OrderViewModel order)
     {
         if (User.IsInRole("Cliente"))
         {
@@ -158,7 +165,7 @@ public class OrdersController : Controller
     [Authorize(Roles = "Admin,Operador")]
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Edit(int id, [Bind("Id,CustomerName,CustomerEmail")] OrderViewModel order)
+    public async Task<IActionResult> Edit(int id, [Bind("Id,CustomerProfileId,CustomerName,CustomerEmail,DeliveryAddressId,DeliveryStreet,DeliveryNumber,DeliveryCity,DeliveryState")] OrderViewModel order)
     {
         if (id != order.Id)
         {

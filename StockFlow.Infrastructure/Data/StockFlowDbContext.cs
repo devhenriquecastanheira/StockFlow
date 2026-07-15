@@ -19,6 +19,9 @@ public sealed class StockFlowDbContext(DbContextOptions<StockFlowDbContext> opti
     public DbSet<StockTransfer> StockTransfers => Set<StockTransfer>();
     public DbSet<Order> Orders => Set<Order>();
     public DbSet<OrderItem> OrderItems => Set<OrderItem>();
+    public DbSet<Cart> Carts => Set<Cart>();
+    public DbSet<CartItem> CartItems => Set<CartItem>();
+    public DbSet<Invoice> Invoices => Set<Invoice>();
     public DbSet<PurchaseOrder> PurchaseOrders => Set<PurchaseOrder>();
     public DbSet<PurchaseOrderItem> PurchaseOrderItems => Set<PurchaseOrderItem>();
     public DbSet<PhysicalInventory> PhysicalInventories => Set<PhysicalInventory>();
@@ -49,6 +52,38 @@ public sealed class StockFlowDbContext(DbContextOptions<StockFlowDbContext> opti
             .WithOne(address => address.CustomerProfile)
             .HasForeignKey(address => address.CustomerProfileId)
             .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<CustomerProfile>()
+            .HasMany(profile => profile.Orders)
+            .WithOne(order => order.CustomerProfile)
+            .HasForeignKey(order => order.CustomerProfileId);
+
+        modelBuilder.Entity<Order>()
+            .HasOne<CustomerAddress>()
+            .WithMany()
+            .HasForeignKey(order => order.DeliveryAddressId)
+            .OnDelete(DeleteBehavior.SetNull);
+
+        modelBuilder.Entity<CustomerProfile>()
+            .HasMany(profile => profile.Carts)
+            .WithOne(cart => cart.CustomerProfile)
+            .HasForeignKey(cart => cart.CustomerProfileId);
+
+        modelBuilder.Entity<Cart>()
+            .HasMany(cart => cart.Items)
+            .WithOne(item => item.Cart)
+            .HasForeignKey(item => item.CartId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<CartItem>()
+            .HasOne(item => item.ProductVariant)
+            .WithMany()
+            .HasForeignKey(item => item.ProductVariantId);
+
+        modelBuilder.Entity<Invoice>()
+            .HasOne(invoice => invoice.Order)
+            .WithOne(order => order.Invoice)
+            .HasForeignKey<Invoice>(invoice => invoice.OrderId);
 
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(StockFlowDbContext).Assembly);
     }
