@@ -20,7 +20,7 @@ public class OrdersController : Controller
     public async Task<IActionResult> Index()
     {
         var orders = await _httpClient.GetFromJsonAsync<List<OrderViewModel>>("api/orders")
-            ?? [];
+            ?? new List<OrderViewModel>();
 
         return View(orders);
     }
@@ -46,41 +46,17 @@ public class OrdersController : Controller
         return View(order);
     }
 
-    public async Task<IActionResult> Create()
+    [Authorize(Roles = "Admin,Operador")]
+    public IActionResult Create()
     {
-        if (!User.IsInRole("Cliente"))
-        {
-            return View();
-        }
-
-        var profile = await GetCustomerProfileAsync();
-        var address = profile?.Addresses.FirstOrDefault();
-        var order = new OrderViewModel
-        {
-            CustomerProfileId = profile?.Id ?? 0,
-            CustomerName = profile?.User.Name ?? User.Identity?.Name ?? string.Empty,
-            CustomerEmail = profile?.User.Email ?? string.Empty,
-            DeliveryAddressId = address?.Id,
-            DeliveryStreet = address?.Street ?? string.Empty,
-            DeliveryNumber = address?.Number ?? string.Empty,
-            DeliveryCity = address?.City ?? string.Empty,
-            DeliveryState = address?.State ?? string.Empty
-        };
-
-        return View(order);
+        return View();
     }
 
+    [Authorize(Roles = "Admin,Operador")]
     [HttpPost]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Create([Bind("Id,CustomerName,CustomerEmail,Status,DeliveryAddressId,DeliveryStreet,DeliveryNumber,DeliveryCity,DeliveryState")] OrderViewModel order)
     {
-        if (User.IsInRole("Cliente"))
-        {
-            var profile = await GetCustomerProfileAsync();
-            order.CustomerName = profile?.User.Name ?? User.Identity?.Name ?? order.CustomerName;
-            order.CustomerEmail = profile?.User.Email ?? order.CustomerEmail;
-        }
-
         if (ModelState.IsValid)
         {
             var response = await _httpClient.PostAsJsonAsync("api/orders", order);
@@ -249,7 +225,7 @@ public class OrdersController : Controller
     private async Task FillVariantOptionsAsync(OrderItemViewModel orderItem)
     {
         var variants = await _httpClient.GetFromJsonAsync<List<ProductVariantViewModel>>("api/products/variants")
-            ?? [];
+            ?? new List<ProductVariantViewModel>();
 
         orderItem.VariantOptions = variants.Select(v => new SelectListItem
         {
@@ -261,12 +237,12 @@ public class OrdersController : Controller
     private async Task<decimal?> GetSalePriceAsync(int productVariantId)
     {
         var products = await _httpClient.GetFromJsonAsync<List<ProductViewModel>>("api/products")
-            ?? [];
+            ?? new List<ProductViewModel>();
 
         foreach (var product in products)
         {
             var variants = await _httpClient.GetFromJsonAsync<List<ProductVariantViewModel>>(
-                $"api/products/{product.Id}/variants") ?? [];
+                $"api/products/{product.Id}/variants") ?? new List<ProductVariantViewModel>();
 
             if (variants.Any(variant => variant.Id == productVariantId))
             {
@@ -377,15 +353,4 @@ public class OrdersController : Controller
         return RedirectToAction(nameof(Details), new { id = orderId });
     }
 
-    private async Task<CustomerProfileViewModel?> GetCustomerProfileAsync()
-    {
-        var response = await _httpClient.GetAsync("api/customers/me");
-
-        if (!response.IsSuccessStatusCode)
-        {
-            return null;
-        }
-
-        return await response.Content.ReadFromJsonAsync<CustomerProfileViewModel>();
-    }
 }

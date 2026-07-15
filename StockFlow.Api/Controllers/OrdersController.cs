@@ -1,7 +1,6 @@
 using FluentValidation;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using StockFlow.Application.Customers;
 using StockFlow.Application.Orders;
 using StockFlow.Domain.Entities;
 using StockFlow.Domain.Enums;
@@ -14,12 +13,10 @@ namespace StockFlow.Api.Controllers;
 public class OrdersController : ControllerBase
 {
     private readonly IOrderService _orderService;
-    private readonly ICustomerService _customerService;
 
-    public OrdersController(IOrderService orderService, ICustomerService customerService)
+    public OrdersController(IOrderService orderService)
     {
         _orderService = orderService;
-        _customerService = customerService;
     }
 
     [HttpGet]
@@ -42,41 +39,45 @@ public class OrdersController : ControllerBase
         return Ok(order);
     }
 
-    [HttpPost]
-    [Authorize(Roles = "Admin,Operador,Cliente")]
-    public async Task<ActionResult<Order>> Create(Order order)
+    [HttpPost("checkout")]
+    [Authorize(Roles = "Cliente")]
+    public async Task<ActionResult<OrderDto>> Checkout(CheckoutRequestDto request)
     {
-        if (User.IsInRole("Cliente"))
+        if (request.SelectedAddressId <= 0)
         {
-            var userId = GetCurrentUserId();
-            if (userId is null)
-            {
-                return Unauthorized();
-            }
-
-            var profile = await _customerService.GetProfileAsync(userId.Value);
-            if (profile is null)
-            {
-                return Unauthorized();
-            }
-
-            order.CustomerProfileId = profile.Id;
-            order.CustomerName = profile.User.Name;
-            order.CustomerEmail = profile.User.Email;
-
-            var address = profile.Addresses.FirstOrDefault(address => address.Id == order.DeliveryAddressId)
-                ?? profile.Addresses.FirstOrDefault();
-
-            if (address is not null)
-            {
-                order.DeliveryAddressId = address.Id;
-                order.DeliveryStreet = address.Street;
-                order.DeliveryNumber = address.Number;
-                order.DeliveryCity = address.City;
-                order.DeliveryState = address.State;
-            }
+            return BadRequest("Selecione um endereço de entrega.");
         }
 
+        var userId = GetCurrentUserId();
+        if (userId is null)
+        {
+            return Unauthorized();
+        }
+
+        try
+        {
+            var order = await _orderService.CheckoutAsync(userId.Value, request.SelectedAddressId);
+            if (order is null)
+            {
+                return Unauthorized();
+            }
+
+            return CreatedAtAction(nameof(GetById), new { id = order.Id }, order);
+        }
+        catch (ValidationException ex)
+        {
+            return BadRequest(ex.Errors);
+        }
+        catch (InvalidOperationException ex)
+        {
+            return BadRequest(ex.Message);
+        }
+    }
+
+    [HttpPost]
+    [Authorize(Roles = "Admin,Operador")]
+    public async Task<ActionResult<Order>> Create(Order order)
+    {
         var createdOrder = await _orderService.AddOrderAsync(order);
         return CreatedAtAction(nameof(GetById), new { id = createdOrder.Id }, createdOrder);
     }

@@ -16,7 +16,7 @@
 else if (User.IsInRole("Cliente"))
 {
     <p>
-        <a asp-controller="Orders" asp-action="Create" class="btn btn-primary">Iniciar carrinho</a>
+        <a asp-controller="Cart" asp-action="Index" class="btn btn-primary">Ver carrinho</a>
     </p>
 }
 
@@ -80,7 +80,7 @@ else
                     <td>@product.SalePrice.ToString("C")</td>
                     <td>
                         <a asp-action="Details" asp-route-id="@product.Id">Detalhes</a> |
-                        <a asp-controller="ProductVariants" asp-action="Index" asp-route-productId="@product.Id">Variantes</a>
+                        <a asp-controller="ProductVariants" asp-action="Index" asp-route-productId="@product.Id">Ver opções</a>
                         @if (User.IsInRole("Admin") || User.IsInRole("Operador"))
                         {
                             <span>|</span>

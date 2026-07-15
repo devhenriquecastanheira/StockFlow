@@ -9,5 +9,5 @@ public class Cart
 
     [JsonIgnore]
     public CustomerProfile CustomerProfile { get; set; } = null!;
-    public ICollection<CartItem> Items { get; set; } = [];
+    public ICollection<CartItem> Items { get; set; } = new List<CartItem>();
 }

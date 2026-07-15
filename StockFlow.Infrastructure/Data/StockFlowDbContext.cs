@@ -3,9 +3,12 @@ using StockFlow.Domain.Entities;
 
 namespace StockFlow.Infrastructure.Data;
 
-public sealed class StockFlowDbContext(DbContextOptions<StockFlowDbContext> options)
-    : DbContext(options)
+public class StockFlowDbContext : DbContext
 {
+    public StockFlowDbContext(DbContextOptions<StockFlowDbContext> options) : base(options)
+    {
+    }
+
     public DbSet<Category> Categories => Set<Category>();
     public DbSet<Product> Products => Set<Product>();
     public DbSet<ProductVariant> ProductVariants => Set<ProductVariant>();

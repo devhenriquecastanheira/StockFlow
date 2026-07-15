@@ -19,7 +19,7 @@
     else if (User.IsInRole("Cliente"))
     {
         <p>
-            <a asp-controller="Orders" asp-action="Create" class="btn btn-primary">Iniciar carrinho</a>
+            <a asp-controller="Cart" asp-action="Index" class="btn btn-primary">Ver carrinho</a>
         </p>
     }
 
@@ -62,7 +62,12 @@
                             }
                             else
                             {
-                                <span>-</span>
+                                <form asp-controller="Cart" asp-action="AddItem" method="post" class="d-flex gap-2">
+                                    <input type="hidden" name="ProductId" value="@Model.Id" />
+                                    <input type="hidden" name="ProductVariantId" value="@variant.Id" />
+                                    <input type="number" name="Quantity" value="1" min="1" class="form-control form-control-sm" style="width: 80px;" />
+                                    <button type="submit" class="btn btn-sm btn-primary">Adicionar</button>
+                                </form>
                             }
                         </td>
                     </tr>

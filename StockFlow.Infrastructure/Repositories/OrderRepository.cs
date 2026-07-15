@@ -47,6 +47,13 @@ public class OrderRepository : IOrderRepository
         await _context.SaveChangesAsync();
     }
 
+    public async Task CheckoutAsync(Order order, List<CartItem> cartItems)
+    {
+        await _context.Orders.AddAsync(order);
+        _context.CartItems.RemoveRange(cartItems);
+        await _context.SaveChangesAsync();
+    }
+
     public async Task UpdateAsync(Order order)
     {
         _context.Orders.Update(order);

@@ -9,15 +9,21 @@ namespace StockFlow.Application.Orders;
 public class OrderService : IOrderService
 {
     private readonly IOrderRepository _orderRepository;
+    private readonly ICartRepository _cartRepository;
+    private readonly ICustomerRepository _customerRepository;
     private readonly IValidator<Order> _orderValidator;
     private readonly IStockService _stockService;
 
     public OrderService(
         IOrderRepository orderRepository,
+        ICartRepository cartRepository,
+        ICustomerRepository customerRepository,
         IValidator<Order> orderValidator,
         IStockService stockService)
     {
         _orderRepository = orderRepository;
+        _cartRepository = cartRepository;
+        _customerRepository = customerRepository;
         _orderValidator = orderValidator;
         _stockService = stockService;
     }
@@ -97,6 +103,54 @@ public class OrderService : IOrderService
         await _orderRepository.AddAsync(order);
 
         return order;
+    }
+
+    public async Task<OrderDto?> CheckoutAsync(int userId, int selectedAddressId)
+    {
+        var profile = await _customerRepository.GetProfileByUserIdAsync(userId);
+        if (profile is null)
+        {
+            return null;
+        }
+
+        var address = profile.Addresses.FirstOrDefault(address => address.Id == selectedAddressId);
+        if (address is null)
+        {
+            throw new InvalidOperationException("Endereço de entrega inválido.");
+        }
+
+        var cart = await _cartRepository.GetByCustomerProfileIdAsync(profile.Id);
+        if (cart is null || cart.Items.Count == 0)
+        {
+            throw new InvalidOperationException("O carrinho está vazio.");
+        }
+
+        var order = new Order
+        {
+            CustomerProfileId = profile.Id,
+            CustomerProfile = profile,
+            CustomerName = profile.User.Name,
+            CustomerEmail = profile.User.Email,
+            DeliveryAddressId = address.Id,
+            DeliveryStreet = address.Street,
+            DeliveryNumber = address.Number,
+            DeliveryCity = address.City,
+            DeliveryState = address.State,
+            CreatedAt = DateTime.UtcNow,
+            Status = OrderStatus.Pending,
+            Items = cart.Items.Select(item => new OrderItem
+            {
+                ProductVariantId = item.ProductVariantId,
+                ProductVariant = item.ProductVariant,
+                Quantity = item.Quantity,
+                UnitPrice = item.UnitPrice
+            }).ToList()
+        };
+
+        await _orderValidator.ValidateAndThrowAsync(order);
+        await _orderRepository.CheckoutAsync(order, cart.Items.ToList());
+
+        return await GetOrderAsync(order.Id);
     }
 
     public async Task<OrderDto?> UpdateOrderAsync(int id, Order order)
