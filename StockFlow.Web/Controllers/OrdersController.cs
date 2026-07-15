@@ -25,6 +25,28 @@ public class OrdersController : Controller
         return View(orders);
     }
 
+    [Authorize(Roles = "Cliente")]
+    public async Task<IActionResult> History()
+    {
+        var response = await _httpClient.GetAsync("api/orders/me");
+        if (response.StatusCode == HttpStatusCode.Unauthorized)
+        {
+            return RedirectToAction("Login", "Account");
+        }
+
+        if (response.StatusCode == HttpStatusCode.NotFound)
+        {
+            return View(new List<OrderViewModel>());
+        }
+
+        response.EnsureSuccessStatusCode();
+
+        var orders = await response.Content.ReadFromJsonAsync<List<OrderViewModel>>()
+            ?? new List<OrderViewModel>();
+
+        return View(orders);
+    }
+
     public async Task<IActionResult> Details(int? id)
     {
         if (id == null)

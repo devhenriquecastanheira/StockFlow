@@ -27,11 +27,46 @@ public class OrdersController : ControllerBase
         return Ok(orders);
     }
 
-    [HttpGet("{id}")]
+    [HttpGet("me")]
+    [Authorize(Roles = "Cliente")]
+    public async Task<ActionResult<List<OrderDto>>> GetMine()
+    {
+        var userId = GetCurrentUserId();
+        if (userId is null)
+        {
+            return Unauthorized();
+        }
+
+        var orders = await _orderService.GetCustomerOrdersAsync(userId.Value);
+        if (orders is null)
+        {
+            return NotFound();
+        }
+
+        return Ok(orders);
+    }
+
+    [HttpGet("{id:int}")]
     [Authorize(Roles = "Admin,Operador,Cliente")]
     public async Task<ActionResult<OrderDto>> GetById(int id)
     {
-        var order = await _orderService.GetOrderAsync(id);
+        OrderDto? order;
+
+        if (User.IsInRole("Cliente"))
+        {
+            var userId = GetCurrentUserId();
+            if (userId is null)
+            {
+                return Unauthorized();
+            }
+
+            order = await _orderService.GetCustomerOrderAsync(userId.Value, id);
+        }
+        else
+        {
+            order = await _orderService.GetOrderAsync(id);
+        }
+
         if (order == null)
         {
             return NotFound();
@@ -122,6 +157,21 @@ public class OrdersController : ControllerBase
     [Authorize(Roles = "Admin,Operador,Cliente")]
     public async Task<ActionResult<OrderDto>> AddItem(int orderId, CreateOrderItemDto item)
     {
+        if (User.IsInRole("Cliente"))
+        {
+            var userId = GetCurrentUserId();
+            if (userId is null)
+            {
+                return Unauthorized();
+            }
+
+            var order = await _orderService.GetCustomerOrderAsync(userId.Value, orderId);
+            if (order is null)
+            {
+                return NotFound();
+            }
+        }
+
         var updatedOrder = await _orderService.AddOrderItemAsync(orderId, item);
         if (updatedOrder == null)
         {
@@ -134,6 +184,21 @@ public class OrdersController : ControllerBase
     [Authorize(Roles = "Admin,Operador,Cliente")]
     public async Task<ActionResult> RemoveItem(int orderId, int itemId)
     {
+        if (User.IsInRole("Cliente"))
+        {
+            var userId = GetCurrentUserId();
+            if (userId is null)
+            {
+                return Unauthorized();
+            }
+
+            var order = await _orderService.GetCustomerOrderAsync(userId.Value, orderId);
+            if (order is null)
+            {
+                return NotFound();
+            }
+        }
+
         var removedItem = await _orderService.RemoveOrderItemAsync(orderId, itemId);
         if (removedItem is null)
         {
@@ -146,6 +211,21 @@ public class OrdersController : ControllerBase
     [Authorize(Roles = "Admin,Operador,Cliente")]
     public async Task<ActionResult<OrderDto>> ConfirmOrder(int orderId)
     {
+        if (User.IsInRole("Cliente"))
+        {
+            var userId = GetCurrentUserId();
+            if (userId is null)
+            {
+                return Unauthorized();
+            }
+
+            var order = await _orderService.GetCustomerOrderAsync(userId.Value, orderId);
+            if (order is null)
+            {
+                return NotFound();
+            }
+        }
+
         try
         {
             var confirmedOrder = await _orderService.ConfirmOrderAsync(orderId);
@@ -171,6 +251,21 @@ public class OrdersController : ControllerBase
     [Authorize(Roles = "Admin,Operador,Cliente")]
     public async Task<IActionResult> DownloadInvoice(int orderId)
     {
+        if (User.IsInRole("Cliente"))
+        {
+            var userId = GetCurrentUserId();
+            if (userId is null)
+            {
+                return Unauthorized();
+            }
+
+            var order = await _orderService.GetCustomerOrderAsync(userId.Value, orderId);
+            if (order is null)
+            {
+                return NotFound();
+            }
+        }
+
         var pdf = await _orderService.GetInvoicePdfAsync(orderId);
 
         if (pdf is null)

@@ -11,6 +11,7 @@ public interface IOrderRepository
 {
     Task<List<Order>> GetAllAsync();
     Task<Order?> GetByIdAsync(int id);
+    Task<List<Order>> GetByCustomerProfileIdAsync(int customerProfileId);
     Task AddAsync(Order order);
     Task CheckoutAsync(Order order, List<CartItem> cartItems);
     Task UpdateAsync(Order order);

@@ -12,6 +12,8 @@ public interface IOrderService
 {
     Task<List<OrderDto>> GetOrdersAsync();
     Task<OrderDto?> GetOrderAsync(int id);
+    Task<List<OrderDto>?> GetCustomerOrdersAsync(int userId);
+    Task<OrderDto?> GetCustomerOrderAsync(int userId, int id);
     Task<Order> AddOrderAsync(Order order);
     Task<OrderDto?> CheckoutAsync(int userId, int selectedAddressId);
     Task<OrderDto?> UpdateOrderAsync(int id, Order order);

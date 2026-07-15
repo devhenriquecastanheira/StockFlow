@@ -43,6 +43,20 @@ public class OrderRepository : IOrderRepository
             .FirstOrDefaultAsync(order => order.Id == id);
     }
 
+    public async Task<List<Order>> GetByCustomerProfileIdAsync(int customerProfileId)
+    {
+        return await _context.Orders
+            .Include(order => order.Invoice)
+            .Include(order => order.CustomerProfile)
+            .ThenInclude(profile => profile!.User)
+            .Include(order => order.Items)
+            .ThenInclude(item => item.ProductVariant)
+            .ThenInclude(variant => variant.Product)
+            .Where(order => order.CustomerProfileId == customerProfileId)
+            .OrderByDescending(order => order.CreatedAt)
+            .ToListAsync();
+    }
+
     public async Task AddAsync(Order order)
     {
         await _context.Orders.AddAsync(order);

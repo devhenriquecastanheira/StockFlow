@@ -98,6 +98,83 @@ public class OrderService : IOrderService
         };
     }
 
+    public async Task<List<OrderDto>?> GetCustomerOrdersAsync(int userId)
+    {
+        var profile = await _customerRepository.GetProfileByUserIdAsync(userId);
+        if (profile is null)
+        {
+            return null;
+        }
+
+        var orders = await _orderRepository.GetByCustomerProfileIdAsync(profile.Id);
+        return orders.Select(order => new OrderDto
+        {
+            Id = order.Id,
+            CustomerProfileId = order.CustomerProfileId,
+            CustomerName = order.CustomerName,
+            CustomerEmail = order.CustomerEmail,
+            DeliveryAddressId = order.DeliveryAddressId,
+            DeliveryStreet = order.DeliveryStreet,
+            DeliveryNumber = order.DeliveryNumber,
+            DeliveryCity = order.DeliveryCity,
+            DeliveryState = order.DeliveryState,
+            CreatedAt = order.CreatedAt,
+            Status = order.Status,
+            Invoice = GetInvoiceDto(order),
+            Items = order.Items.Select(item => new OrderItemDto
+            {
+                Id = item.Id,
+                ProductVariantId = item.ProductVariantId,
+                ProductName = item.ProductVariant.Product.Name,
+                Size = item.ProductVariant.Size,
+                Color = item.ProductVariant.Color,
+                Quantity = item.Quantity,
+                UnitPrice = item.UnitPrice
+            }).ToList()
+        }).ToList();
+    }
+
+    public async Task<OrderDto?> GetCustomerOrderAsync(int userId, int id)
+    {
+        var profile = await _customerRepository.GetProfileByUserIdAsync(userId);
+        if (profile is null)
+        {
+            return null;
+        }
+
+        var order = await _orderRepository.GetByIdAsync(id);
+        if (order is null || order.CustomerProfileId != profile.Id)
+        {
+            return null;
+        }
+
+        return new OrderDto
+        {
+            Id = order.Id,
+            CustomerProfileId = order.CustomerProfileId,
+            CustomerName = order.CustomerName,
+            CustomerEmail = order.CustomerEmail,
+            DeliveryAddressId = order.DeliveryAddressId,
+            DeliveryStreet = order.DeliveryStreet,
+            DeliveryNumber = order.DeliveryNumber,
+            DeliveryCity = order.DeliveryCity,
+            DeliveryState = order.DeliveryState,
+            CreatedAt = order.CreatedAt,
+            Status = order.Status,
+            Invoice = GetInvoiceDto(order),
+            Items = order.Items.Select(item => new OrderItemDto
+            {
+                Id = item.Id,
+                ProductVariantId = item.ProductVariantId,
+                ProductName = item.ProductVariant.Product.Name,
+                Size = item.ProductVariant.Size,
+                Color = item.ProductVariant.Color,
+                Quantity = item.Quantity,
+                UnitPrice = item.UnitPrice
+            }).ToList()
+        };
+    }
+
     public async Task<Order> AddOrderAsync(Order order)
     {
         order.Status = OrderStatus.Pending;
@@ -406,7 +483,7 @@ public class OrderService : IOrderService
         return CreateInvoicePdf(order);
     }
 
-    private InvoiceDto? GetInvoiceDto(Order order)
+    private static InvoiceDto? GetInvoiceDto(Order order)
     {
         if (order.Invoice is null)
         {
