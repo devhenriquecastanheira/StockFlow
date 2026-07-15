@@ -47,6 +47,21 @@
         <dd class="col-sm-10 fw-bold">R$ @Model.Total.ToString("F2")</dd>
     </dl>
 
+    @if (Model.Invoice is not null)
+    {
+        <h4>Fatura</h4>
+        <dl class="row">
+            <dt class="col-sm-2">Número</dt>
+            <dd class="col-sm-10">@Model.Invoice.Number</dd>
+            <dt class="col-sm-2">Emissão</dt>
+            <dd class="col-sm-10">@Model.Invoice.IssuedAt.ToString("dd/MM/yyyy HH:mm")</dd>
+            <dt class="col-sm-2">Valor</dt>
+            <dd class="col-sm-10 fw-bold">R$ @Model.Invoice.TotalAmount.ToString("F2")</dd>
+        </dl>
+
+        <a asp-action="Invoice" asp-route-orderId="@Model.Id" class="btn btn-secondary">Baixar fatura em PDF</a>
+    }
+
     @if (Model.Status == OrderStatusViewModel.Pending)
     {
         <form asp-action="ConfirmOrder" asp-route-orderId="@Model.Id" method="post" style="display:inline">

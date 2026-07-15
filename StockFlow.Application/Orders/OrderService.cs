@@ -1,4 +1,7 @@
 using FluentValidation;
+using QuestPDF.Fluent;
+using QuestPDF.Helpers;
+using QuestPDF.Infrastructure;
 using StockFlow.Application.Stock;
 using StockFlow.Domain.Entities;
 using StockFlow.Domain.Enums;
@@ -45,6 +48,7 @@ public class OrderService : IOrderService
             DeliveryState = order.DeliveryState,
             CreatedAt = order.CreatedAt,
             Status = order.Status,
+            Invoice = GetInvoiceDto(order),
             Items = order.Items.Select(item => new OrderItemDto
             {
                 Id = item.Id,
@@ -80,6 +84,7 @@ public class OrderService : IOrderService
             DeliveryState = order.DeliveryState,
             CreatedAt = order.CreatedAt,
             Status = order.Status,
+            Invoice = GetInvoiceDto(order),
             Items = order.Items.Select(item => new OrderItemDto
             {
                 Id = item.Id,
@@ -187,6 +192,7 @@ public class OrderService : IOrderService
             DeliveryState = existingOrder.DeliveryState,
             CreatedAt = existingOrder.CreatedAt,
             Status = existingOrder.Status,
+            Invoice = GetInvoiceDto(existingOrder),
             Items = existingOrder.Items.Select(item => new OrderItemDto
             {
                 Id = item.Id,
@@ -236,6 +242,7 @@ public class OrderService : IOrderService
             DeliveryState = order.DeliveryState,
             CreatedAt = order.CreatedAt,
             Status = order.Status,
+            Invoice = GetInvoiceDto(order),
             Items = order.Items.Select(item => new OrderItemDto
             {
                 Id = item.Id,
@@ -286,6 +293,7 @@ public class OrderService : IOrderService
             DeliveryState = updatedOrder.DeliveryState,
             CreatedAt = updatedOrder.CreatedAt,
             Status = updatedOrder.Status,
+            Invoice = GetInvoiceDto(updatedOrder),
             Items = updatedOrder.Items.Select(item => new OrderItemDto
             {
                 Id = item.Id,
@@ -334,6 +342,13 @@ public class OrderService : IOrderService
             throw new InvalidOperationException("O pedido deve conter pelo menos um item para ser confirmado.");
         }
 
+        if (string.IsNullOrWhiteSpace(order.DeliveryStreet) ||
+            string.IsNullOrWhiteSpace(order.DeliveryCity) ||
+            string.IsNullOrWhiteSpace(order.DeliveryState))
+        {
+            throw new InvalidOperationException("O pedido precisa ter endereço de entrega.");
+        }
+
         foreach (var item in order.Items)
         {
             await _stockService.RegisterExitAcrossWarehousesAsync(
@@ -343,6 +358,13 @@ public class OrderService : IOrderService
         }
 
         order.Status = OrderStatus.Confirmed;
+        order.Invoice = new Invoice
+        {
+            OrderId = order.Id,
+            Number = "FAT-" + order.Id.ToString("D5"),
+            IssuedAt = DateTime.UtcNow,
+            TotalAmount = order.Items.Sum(item => item.Quantity * item.UnitPrice)
+        };
 
         await _orderRepository.UpdateAsync(order);
         return new OrderDto
@@ -358,6 +380,7 @@ public class OrderService : IOrderService
             DeliveryState = order.DeliveryState,
             CreatedAt = order.CreatedAt,
             Status = order.Status,
+            Invoice = GetInvoiceDto(order),
             Items = order.Items.Select(item => new OrderItemDto
             {
                 Id = item.Id,
@@ -369,5 +392,82 @@ public class OrderService : IOrderService
                 UnitPrice = item.UnitPrice
             }).ToList()
         };
+    }
+
+    public async Task<byte[]?> GetInvoicePdfAsync(int orderId)
+    {
+        var order = await _orderRepository.GetByIdAsync(orderId);
+
+        if (order is null || order.Invoice is null)
+        {
+            return null;
+        }
+
+        return CreateInvoicePdf(order);
+    }
+
+    private InvoiceDto? GetInvoiceDto(Order order)
+    {
+        if (order.Invoice is null)
+        {
+            return null;
+        }
+
+        return new InvoiceDto
+        {
+            Id = order.Invoice.Id,
+            OrderId = order.Invoice.OrderId,
+            Number = order.Invoice.Number,
+            IssuedAt = order.Invoice.IssuedAt,
+            TotalAmount = order.Invoice.TotalAmount
+        };
+    }
+
+    private byte[] CreateInvoicePdf(Order order)
+    {
+        var invoice = order.Invoice!;
+
+        var document = Document.Create(container =>
+        {
+            container.Page(page =>
+            {
+                page.Size(PageSizes.A4);
+                page.Margin(30);
+                page.DefaultTextStyle(text => text.FontSize(11));
+
+                page.Header()
+                    .Text("Fatura " + invoice.Number)
+                    .Bold()
+                    .FontSize(20);
+
+                page.Content().Column(column =>
+                {
+                    column.Spacing(8);
+
+                    column.Item().Text("Pedido #" + order.Id);
+                    column.Item().Text("Cliente: " + order.CustomerName);
+                    column.Item().Text("Email: " + order.CustomerEmail);
+                    column.Item().Text("Data: " + invoice.IssuedAt.ToString("dd/MM/yyyy HH:mm"));
+                    column.Item().Text("Entrega: " + order.DeliveryStreet + ", " + order.DeliveryNumber + " - " + order.DeliveryCity + "/" + order.DeliveryState);
+                    column.Item().Text("Itens").Bold();
+
+                    foreach (var item in order.Items)
+                    {
+                        var productName = item.ProductVariant.Product.Name;
+                        var line = productName + " - " +
+                            item.ProductVariant.Size + " - " +
+                            item.ProductVariant.Color + " - " +
+                            item.Quantity + " x " +
+                            item.UnitPrice.ToString("C");
+
+                        column.Item().Text(line);
+                    }
+
+                    column.Item().Text("Total: " + invoice.TotalAmount.ToString("C")).Bold();
+                });
+            });
+        });
+
+        return document.GeneratePdf();
     }
 }

@@ -21,4 +21,5 @@ public class OrderDto
     public DateTime CreatedAt { get; set; }
     public OrderStatus Status { get; set; }
     public List<OrderItemDto> Items { get; set; } = new List<OrderItemDto>();
+    public InvoiceDto? Invoice { get; set; }
 }

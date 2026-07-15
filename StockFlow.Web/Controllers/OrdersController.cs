@@ -353,4 +353,18 @@ public class OrdersController : Controller
         return RedirectToAction(nameof(Details), new { id = orderId });
     }
 
+    public async Task<IActionResult> Invoice(int orderId)
+    {
+        var response = await _httpClient.GetAsync($"api/orders/{orderId}/invoice/pdf");
+
+        if (response.StatusCode == HttpStatusCode.NotFound)
+        {
+            return NotFound();
+        }
+
+        response.EnsureSuccessStatusCode();
+
+        var pdf = await response.Content.ReadAsByteArrayAsync();
+        return File(pdf, "application/pdf", $"fatura-{orderId}.pdf");
+    }
 }

@@ -20,4 +20,5 @@ public interface IOrderService
     Task<OrderDto?> AddOrderItemAsync(int orderId, CreateOrderItemDto item);
     Task<Order?> RemoveOrderItemAsync(int orderId, int itemId);
     Task<OrderDto?> ConfirmOrderAsync(int orderId);
+    Task<byte[]?> GetInvoicePdfAsync(int orderId);
 }

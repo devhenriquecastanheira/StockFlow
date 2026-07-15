@@ -167,6 +167,20 @@ public class OrdersController : ControllerBase
         }
     }
 
+    [HttpGet("{orderId}/invoice/pdf")]
+    [Authorize(Roles = "Admin,Operador,Cliente")]
+    public async Task<IActionResult> DownloadInvoice(int orderId)
+    {
+        var pdf = await _orderService.GetInvoicePdfAsync(orderId);
+
+        if (pdf is null)
+        {
+            return NotFound();
+        }
+
+        return File(pdf, "application/pdf", $"fatura-{orderId}.pdf");
+    }
+
     private int? GetCurrentUserId()
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
