@@ -7,6 +7,7 @@ using StockFlow.Application.Auth;
 using StockFlow.Application.Cart;
 using StockFlow.Application.Categories;
 using StockFlow.Application.Customers;
+using StockFlow.Application.Email;
 using StockFlow.Application.Orders;
 using StockFlow.Application.Products;
 using StockFlow.Application.PurchaseOrders;
@@ -19,7 +20,6 @@ using StockFlow.Domain.Interfaces;
 using StockFlow.Infrastructure.Data;
 using StockFlow.Infrastructure.Repositories;
 using System.Text;
-using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -69,6 +69,10 @@ builder.Services.AddScoped<ITagService, TagService>();
 
 builder.Services.AddScoped<ICartRepository, CartRepository>();
 builder.Services.AddScoped<ICartService, CartService>();
+
+builder.Services.AddTransient<IEmailSender, EmailSender>();
+
+//builder.Services.AddHostedService<HostedService>();
 
 builder.Services
     .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)

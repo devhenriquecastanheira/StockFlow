@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using StockFlow.Application.Auth;
+using StockFlow.Application.Email;
 
 namespace StockFlow.Api.Controllers;
 
@@ -8,10 +9,12 @@ namespace StockFlow.Api.Controllers;
 public class AuthController : ControllerBase
 {
     private readonly IAuthService _service;
+    private readonly IEmailSender _emailSender;
 
-    public AuthController(IAuthService service)
+    public AuthController(IAuthService service, IEmailSender emailSender)
     {
         _service = service;
+        _emailSender = emailSender;
     }
 
     [HttpPost("register")]
@@ -23,6 +26,11 @@ public class AuthController : ControllerBase
         {
             return BadRequest("Não foi possível cadastrar o usuário.");
         }
+
+        await _emailSender.SendEmailAsync(
+            request.Email,
+            "Bem-vindo ao StockFlow!",
+            $"<h1>Olá, {request.Name}!</h1><p>Seu cadastro foi realizado com sucesso.</p>");
 
         return Ok("Usuário cadastrado com sucesso.");
     }
