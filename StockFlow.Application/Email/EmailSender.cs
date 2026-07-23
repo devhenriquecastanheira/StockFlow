@@ -13,11 +13,17 @@ public class EmailSender : IEmailSender
         _configuration = configuration;
     }
 
-    public async Task SendEmailAsync(string toEmail, string subject, string body)
+    public async Task SendEmailAsync(
+        string toEmail,
+        string subject,
+        string body,
+        byte[]? attachment = null,
+        string? attachmentFileName = null,
+        string attachmentContentType = "application/octet-stream")
     {
         var settings = _configuration.GetSection("EmailSettings");
 
-        var mailMessage = new MailMessage
+        using var mailMessage = new MailMessage
         {
             From = new MailAddress(settings["SenderEmail"]!, settings["SenderName"]),
             Subject = subject,
@@ -26,6 +32,15 @@ public class EmailSender : IEmailSender
         };
 
         mailMessage.To.Add(toEmail);
+
+        if (attachment is not null && attachment.Length > 0)
+        {
+            var attachmentStream = new MemoryStream(attachment);
+            mailMessage.Attachments.Add(new Attachment(
+                attachmentStream,
+                attachmentFileName ?? "anexo",
+                attachmentContentType));
+        }
 
         using var smtpClient = new SmtpClient(settings["SmtpServer"], int.Parse(settings["Port"]!))
         {

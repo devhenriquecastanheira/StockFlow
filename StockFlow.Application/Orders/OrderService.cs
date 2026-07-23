@@ -2,6 +2,7 @@ using FluentValidation;
 using QuestPDF.Fluent;
 using QuestPDF.Helpers;
 using QuestPDF.Infrastructure;
+using StockFlow.Application.Email;
 using StockFlow.Application.Stock;
 using StockFlow.Domain.Entities;
 using StockFlow.Domain.Enums;
@@ -16,19 +17,22 @@ public class OrderService : IOrderService
     private readonly ICustomerRepository _customerRepository;
     private readonly IValidator<Order> _orderValidator;
     private readonly IStockService _stockService;
+    private readonly IEmailSender _emailSender;
 
     public OrderService(
         IOrderRepository orderRepository,
         ICartRepository cartRepository,
         ICustomerRepository customerRepository,
         IValidator<Order> orderValidator,
-        IStockService stockService)
+        IStockService stockService,
+        IEmailSender emailSender)
     {
         _orderRepository = orderRepository;
         _cartRepository = cartRepository;
         _customerRepository = customerRepository;
         _orderValidator = orderValidator;
         _stockService = stockService;
+        _emailSender = emailSender;
     }
 
     public async Task<List<OrderDto>> GetOrdersAsync()
@@ -444,6 +448,8 @@ public class OrderService : IOrderService
         };
 
         await _orderRepository.UpdateAsync(order);
+        await SendInvoiceEmailAsync(order);
+
         return new OrderDto
         {
             Id = order.Id,
@@ -481,6 +487,19 @@ public class OrderService : IOrderService
         }
 
         return CreateInvoicePdf(order);
+    }
+
+    private async Task SendInvoiceEmailAsync(Order order)
+    {
+        var pdf = CreateInvoicePdf(order);
+
+        await _emailSender.SendEmailAsync(
+            order.CustomerEmail,
+            $"Fatura do pedido #{order.Id}",
+            $"<p>Olá, {order.CustomerName}!</p><p>Seu pedido #{order.Id} foi confirmado.</p><p>A fatura segue em anexo.</p>",
+            pdf,
+            $"fatura-{order.Id}.pdf",
+            "application/pdf");
     }
 
     private static InvoiceDto? GetInvoiceDto(Order order)
