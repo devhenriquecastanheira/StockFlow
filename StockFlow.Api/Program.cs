@@ -8,6 +8,7 @@ using StockFlow.Application.Cart;
 using StockFlow.Application.Categories;
 using StockFlow.Application.Customers;
 using StockFlow.Application.Email;
+using StockFlow.Application.HostedServices;
 using StockFlow.Application.Orders;
 using StockFlow.Application.Products;
 using StockFlow.Application.PurchaseOrders;
@@ -72,7 +73,7 @@ builder.Services.AddScoped<ICartService, CartService>();
 
 builder.Services.AddTransient<IEmailSender, EmailSender>();
 
-//builder.Services.AddHostedService<HostedService>();
+builder.Services.AddHostedService<HostedService>();
 
 builder.Services
     .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
