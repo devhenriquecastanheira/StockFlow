@@ -26,71 +26,60 @@ else if (User.IsInRole("Cliente"))
 }
 else
 {
-    <table class="table">
-        <thead>
-            <tr>
-                <th>Imagem</th>
-                <th>Nome</th>
-                <th>Categoria</th>
-                <th>Tags</th>
+    <div class="produtos-cards">
+        @foreach (var product in Model)
+        {
+            var images = product.Images ?? [];
+            var mainImage = images.FirstOrDefault(image => image.IsMain) ?? images.FirstOrDefault();
+
+            <div class="produto-card">
+                @if (mainImage is not null)
+                {
+                    <img src="@(apiBaseUrl + mainImage.ImageUrl)" alt="@product.Name" />
+                }
+                else
+                {
+                    <div class="produto-sem-imagem">Sem imagem</div>
+                }
+
+                <h2>@product.Name</h2>
+                <p class="produto-categoria">@product.CategoryName</p>
+
+                @if (!string.IsNullOrWhiteSpace(product.Description))
+                {
+                    <p>@product.Description</p>
+                }
+
+                <p class="produto-preco">@product.SalePrice.ToString("C")</p>
+
                 @if (User.IsInRole("Admin") || User.IsInRole("Operador"))
                 {
-                    <th>Preço de custo</th>
+                    <p class="produto-custo">Custo: @product.CostPrice.ToString("C")</p>
                 }
-                <th>Preço de venda</th>
-                <th></th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var product in Model)
-            {
-                var images = product.Images ?? [];
-                var mainImage = images.FirstOrDefault(image => image.IsMain) ?? images.FirstOrDefault();
 
-                <tr>
-                    <td>
-                        @if (mainImage is not null)
-                        {
-                            <img src="@(apiBaseUrl + mainImage.ImageUrl)" alt="@product.Name" style="width: 70px; height: 70px; object-fit: cover;" />
-                        }
-                        else
-                        {
-                            <span class="text-secondary">Sem imagem</span>
-                        }
-                    </td>
-                    <td class="fw-medium">@product.Name</td>
-                    <td class="text-secondary">@product.CategoryName</td>
-                    <td>
-                        @if (product.Tags.Count == 0)
-                        {
-                            <span class="text-secondary">-</span>
-                        }
-                        else
-                        {
-                            foreach (var tag in product.Tags)
-                            {
-                                <span class="badge text-bg-secondary me-1">@tag.Name</span>
-                            }
-                        }
-                    </td>
-                    @if (User.IsInRole("Admin") || User.IsInRole("Operador"))
+                <div class="produto-tags">
+                    @if (product.Tags.Count == 0)
                     {
-                        <td>@product.CostPrice.ToString("C")</td>
+                        <span class="text-secondary">Sem tags</span>
                     }
-                    <td>@product.SalePrice.ToString("C")</td>
-                    <td>
-                        <a asp-action="Details" asp-route-id="@product.Id">Detalhes</a> |
-                        <a asp-controller="ProductVariants" asp-action="Index" asp-route-productId="@product.Id">Ver opções</a>
-                        @if (User.IsInRole("Admin") || User.IsInRole("Operador"))
+                    else
+                    {
+                        foreach (var tag in product.Tags)
                         {
-                            <span>|</span>
-                            <a asp-action="Edit" asp-route-id="@product.Id">Editar</a>
-                            <span>|</span>
-                            <a asp-action="Delete" asp-route-id="@product.Id">Excluir</a>
+                            <span class="badge text-bg-secondary me-1 mb-1">@tag.Name</span>
                         }
-                    </td>
-                </tr>
-            }
-        </tbody>
-    </table>
+                    }
+                </div>
+
+                <a class="produto-botao" asp-action="Details" asp-route-id="@product.Id">Detalhes</a>
+                <a class="produto-botao" asp-controller="ProductVariants" asp-action="Index" asp-route-productId="@product.Id">Ver opções</a>
+
+                @if (User.IsInRole("Admin") || User.IsInRole("Operador"))
+                {
+                    <a class="produto-botao" asp-action="Edit" asp-route-id="@product.Id">Editar</a>
+                    <a class="produto-botao" asp-action="Delete" asp-route-id="@product.Id">Excluir</a>
+                }
+            </div>
+        }
+    </div>
 }
