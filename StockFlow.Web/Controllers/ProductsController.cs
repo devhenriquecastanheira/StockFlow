@@ -59,6 +59,8 @@ public class ProductsController : Controller
 
         product.Images ??= [];
         product.Tags = await GetProductTagsAsync(product.Id);
+        product.Variants = await _httpClient.GetFromJsonAsync<List<ProductVariantViewModel>>($"api/products/{product.Id}/variants")
+            ?? [];
         await FillCategoryNameAsync(product);
         await FillTagOptionsAsync(product);
         ViewBag.ApiBaseUrl = _httpClient.BaseAddress?.ToString().TrimEnd('/');
