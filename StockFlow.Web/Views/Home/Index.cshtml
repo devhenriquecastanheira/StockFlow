@@ -1,5 +1,8 @@
+@model IReadOnlyList<ProductViewModel>
+
 @{
     ViewData["Title"] = "Início";
+    var apiBaseUrl = ViewBag.ApiBaseUrl as string ?? string.Empty;
 }
 
 <div class="home-banner mb-4 container-do-banner">
@@ -9,30 +12,36 @@
          alt="Banner de loja com produtos em prateleiras." />
 </div>
 
-<p>
-    <a asp-controller="Categories" asp-action="Index">Acessar categorias</a>
-</p>
+<div class="home-produtos">
+    <h3>Melhores produtos:</h3>
 
-<p>
-    <a asp-controller="Products" asp-action="Index">Acessar produtos</a>
-</p>
+    @if (Model.Count == 0)
+    {
+        <p>Nenhum produto cadastrado.</p>
+    }
+    else
+    {
+        <div class="produtos-cards">
+            @foreach (var product in Model)
+            {
+                var images = product.Images ?? [];
+                var mainImage = images.FirstOrDefault(image => image.IsMain) ?? images.FirstOrDefault();
 
-<p>
-    <a asp-controller="Stock" asp-action="Index">Acessar estoque</a>
-</p>
+                <div class="produto-card">
+                    @if (mainImage is not null)
+                    {
+                        <img src="@(apiBaseUrl + mainImage.ImageUrl)" alt="@product.Name" />
+                    }
+                    else
+                    {
+                        <div class="produto-sem-imagem">Sem imagem</div>
+                    }
 
-<p>
-    <a asp-controller="Suppliers" asp-action="Index">Acessar fornecedores</a>
-</p>
-
-<p>
-    <a asp-controller="Orders" asp-action="Index">Acessar pedidos</a>
-</p>
-
-<p>
-    <a asp-controller="Warehouses" asp-action="Index">Acessar armazéns</a>
-</p>
-
-<p>
-    <a asp-controller="PurchaseOrders" asp-action="Index">Acessar pedidos de compra</a>
-</p>
+                    <h2>@product.Name</h2>
+                    <p class="produto-preco">@product.SalePrice.ToString("C")</p>
+                    <a class="produto-botao" asp-controller="Products" asp-action="Details" asp-route-id="@product.Id">Detalhes</a>
+                </div>
+            }
+        </div>
+    }
+</div>
