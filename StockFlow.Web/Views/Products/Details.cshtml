@@ -1,18 +1,18 @@
 @model ProductViewModel
 
 @{
-    ViewData["Title"] = "Detalhes";
+    ViewData["Title"] = Model.Name;
     var apiBaseUrl = ViewBag.ApiBaseUrl as string ?? string.Empty;
     var images = Model.Images ?? [];
     var mainImage = images.FirstOrDefault(image => image.IsMain) ?? images.FirstOrDefault();
 }
 
-<h1>Detalhes</h1>
-
 @if (TempData["Error"] is not null)
 {
     <div class="alert alert-danger">@TempData["Error"]</div>
 }
+
+<h1>@Model.Name</h1>
 
 <div class="row mb-4">
     <div class="col-md-5">
@@ -37,132 +37,143 @@
     </div>
 
     <div class="col-md-7">
-        <h2>@Model.Name</h2>
-        <p><strong>Categoria:</strong> @Model.CategoryName</p>
-        <p><strong>Descrição:</strong> @(string.IsNullOrWhiteSpace(Model.Description) ? "-" : Model.Description)</p>
-        <p><strong>Preço:</strong> <span class="fs-3">@Model.SalePrice.ToString("C")</span></p>
+        <div class="border p-3">
+            <h2>@Model.SalePrice.ToString("C")</h2>
 
-        @if (User.IsInRole("Admin") || User.IsInRole("Operador"))
-        {
-            <p><strong>Preço de custo:</strong> @Model.CostPrice.ToString("C")</p>
-        }
-
-        @if (Model.Tags.Count > 0)
-        {
-            <p>
-                <strong>Tags:</strong>
-                @foreach (var tag in Model.Tags)
-                {
-                    <span class="badge text-bg-secondary">@tag.Name</span>
-                }
-            </p>
-        }
-
-        @if (User.IsInRole("Cliente"))
-        {
-            @if (Model.Variants.Count == 0)
+            @if (Model.Tags.Count > 0)
             {
-                <button type="button" class="btn btn-secondary" disabled>Indisponível</button>
+                <p>
+                    @foreach (var tag in Model.Tags)
+                    {
+                        <span class="badge text-bg-secondary me-1">@tag.Name</span>
+                    }
+                </p>
             }
-            else
-            {
-                <form asp-controller="Cart" asp-action="AddItem" method="post" class="mb-3">
-                    <input type="hidden" name="ProductId" value="@Model.Id" />
 
-                    <div class="mb-2">
-                        <label for="variantId" class="form-label">Variação</label>
-                        <select id="variantId" name="ProductVariantId" class="form-select">
+            @if (User.IsInRole("Cliente"))
+            {
+                @if (Model.Variants.Count == 0)
+                {
+                    <button type="button" class="btn btn-secondary" disabled>Indisponível</button>
+                }
+                else
+                {
+                    <form asp-controller="Cart" asp-action="AddItem" method="post">
+                        <input type="hidden" name="ProductId" value="@Model.Id" />
+
+                        <div class="mb-3">
+                            <p><strong>Variações</strong></p>
+
                             @foreach (var variant in Model.Variants)
                             {
-                                <option value="@variant.Id">@variant.Sku - @variant.Size - @variant.Color</option>
+                                <div class="border p-2 mb-2">
+                                    <input class="form-check-input" type="radio" id="variant-@variant.Id" name="ProductVariantId" value="@variant.Id" checked="@(Model.Variants.FirstOrDefault()?.Id)" />
+                                    <label for="variant-@variant.Id">
+                                        @variant.Size - @variant.Color
+                                        <br />
+                                        <small>@variant.Sku</small>
+                                    </label>
+                                </div>
                             }
-                        </select>
-                    </div>
+                        </div>
 
-                    <div class="mb-2">
-                        <label for="quantity" class="form-label">Quantidade</label>
-                        <input id="quantity" type="number" name="Quantity" value="1" min="1" class="form-control" />
-                    </div>
+                        <div class="mb-3">
+                            <label for="quantity" class="form-label">Quantidade</label>
+                            <input id="quantity" type="number" name="Quantity" value="1" min="1" class="form-control" />
+                        </div>
 
-                    <button type="submit" class="btn btn-primary">Adicionar ao carrinho</button>
-                    <a asp-controller="Cart" asp-action="Index" class="btn btn-secondary">Ver carrinho</a>
-                </form>
+                        <button type="submit" class="btn btn-primary">Adicionar ao carrinho</button>
+                        <a asp-controller="Cart" asp-action="Index" class="btn btn-secondary">Ver carrinho</a>
+                    </form>
+                }
             }
-        }
-        else
-        {
-            <a class="btn btn-primary" asp-controller="ProductVariants" asp-action="Index" asp-route-productId="@Model.Id">Ver variações</a>
-        }
+
+            @if (User.IsInRole("Admin") || User.IsInRole("Operador"))
+            {
+                <p><strong>Preço de custo:</strong> @Model.CostPrice.ToString("C")</p>
+            }
+        </div>
     </div>
 </div>
 
+<hr />
+
+<section>
+    <h2>Descrição</h2>
+    <p>@(string.IsNullOrWhiteSpace(Model.Description) ? "Produto sem descrição." : Model.Description)</p>
+</section>
+
 @if (User.IsInRole("Admin") || User.IsInRole("Operador"))
 {
-    <h3>Tags</h3>
+    <hr />
 
-    @if (Model.Tags.Count == 0)
-    {
-        <p>Nenhuma tag associada.</p>
-    }
-    else
-    {
-        foreach (var tag in Model.Tags)
+    <div>
+        <h3>Tags</h3>
+
+        @if (Model.Tags.Count == 0)
         {
-            <form asp-action="RemoveTag" method="post" class="d-inline">
+            <p>Nenhuma tag associada.</p>
+        }
+        else
+        {
+            foreach (var tag in Model.Tags)
+            {
+                <form asp-action="RemoveTag" method="post" class="d-inline">
+                    <input type="hidden" name="productId" value="@Model.Id" />
+                    <input type="hidden" name="tagId" value="@tag.Id" />
+                    <span class="badge text-bg-secondary">@tag.Name</span>
+                    <button type="submit" class="btn btn-sm btn-danger me-2">Remover</button>
+                </form>
+            }
+        }
+
+        @if (Model.TagOptions.Count > 0)
+        {
+            <form asp-action="AddTag" method="post" class="row g-2 my-3">
                 <input type="hidden" name="productId" value="@Model.Id" />
-                <input type="hidden" name="tagId" value="@tag.Id" />
-                <span class="badge text-bg-secondary">@tag.Name</span>
-                <button type="submit" class="btn btn-sm btn-danger me-2">Remover</button>
+                <div class="col-md-4">
+                    <select name="tagId" asp-items="Model.TagOptions" class="form-select">
+                        <option value="">Selecione</option>
+                    </select>
+                </div>
+                <div class="col-md-auto">
+                    <button type="submit" class="btn btn-primary">Adicionar</button>
+                </div>
             </form>
         }
-    }
 
-    @if (Model.TagOptions.Count > 0)
-    {
-        <form asp-action="AddTag" method="post" class="row g-2 my-3">
+        <h3>Imagens</h3>
+
+        <form asp-action="UploadImage" method="post" enctype="multipart/form-data" class="mb-3">
             <input type="hidden" name="productId" value="@Model.Id" />
-            <div class="col-md-4">
-                <select name="tagId" asp-items="Model.TagOptions" class="form-select">
-                    <option value="">Selecione</option>
-                </select>
+            <input type="file" name="imageFile" class="form-control mb-2" />
+            <div class="form-check mb-2">
+                <input type="checkbox" name="isMain" value="true" class="form-check-input" id="isMain" />
+                <label class="form-check-label" for="isMain">Imagem principal</label>
             </div>
-            <div class="col-md-auto">
-                <button type="submit" class="btn btn-primary">Adicionar</button>
-            </div>
+            <button type="submit" class="btn btn-primary">Enviar imagem</button>
         </form>
-    }
 
-    <h3>Imagens</h3>
+        @foreach (var image in images)
+        {
+            <div class="mb-2">
+                <img class="produto-admin-img" src="@(apiBaseUrl + image.ImageUrl)" alt="@Model.Name" />
+                <span>@(image.IsMain ? "Principal" : "Imagem")</span>
 
-    <form asp-action="UploadImage" method="post" enctype="multipart/form-data" class="mb-3">
-        <input type="hidden" name="productId" value="@Model.Id" />
-        <input type="file" name="imageFile" class="form-control mb-2" />
-        <div class="form-check mb-2">
-            <input type="checkbox" name="isMain" value="true" class="form-check-input" id="isMain" />
-            <label class="form-check-label" for="isMain">Imagem principal</label>
-        </div>
-        <button type="submit" class="btn btn-primary">Enviar imagem</button>
-    </form>
+                <form asp-action="SetMainImage" method="post" class="d-inline">
+                    <input type="hidden" name="productId" value="@Model.Id" />
+                    <input type="hidden" name="imageId" value="@image.Id" />
+                    <button type="submit" class="btn btn-sm btn-secondary">Principal</button>
+                </form>
 
-    @foreach (var image in images)
-    {
-        <div class="mb-2">
-            <img class="produto-admin-img" src="@(apiBaseUrl + image.ImageUrl)" alt="@Model.Name" />
-            <span>@(image.IsMain ? "Principal" : "Imagem")</span>
-
-            <form asp-action="SetMainImage" method="post" class="d-inline">
-                <input type="hidden" name="productId" value="@Model.Id" />
-                <input type="hidden" name="imageId" value="@image.Id" />
-                <button type="submit" class="btn btn-sm btn-secondary">Principal</button>
-            </form>
-
-            <form asp-action="DeleteImage" method="post" class="d-inline">
-                <input type="hidden" name="productId" value="@Model.Id" />
-                <input type="hidden" name="imageId" value="@image.Id" />
-                <button type="submit" class="btn btn-sm btn-danger">Excluir</button>
-            </form>
-        </div>
-    }
+                <form asp-action="DeleteImage" method="post" class="d-inline">
+                    <input type="hidden" name="productId" value="@Model.Id" />
+                    <input type="hidden" name="imageId" value="@image.Id" />
+                    <button type="submit" class="btn btn-sm btn-danger">Excluir</button>
+                </form>
+            </div>
+        }
+    </div>
 }
 
 <div class="mt-3">

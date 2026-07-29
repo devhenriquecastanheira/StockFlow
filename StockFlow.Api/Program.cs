@@ -73,7 +73,7 @@ builder.Services.AddScoped<ICartService, CartService>();
 
 builder.Services.AddTransient<IEmailSender, EmailSender>();
 
-builder.Services.AddHostedService<HostedService>();
+//builder.Services.AddHostedService<HostedService>();
 
 builder.Services
     .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
