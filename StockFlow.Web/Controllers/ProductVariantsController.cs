@@ -14,6 +14,7 @@ public class ProductVariantsController : Controller
         _httpClient = httpClientFactory.CreateClient("StockFlowApi");
     }
 
+    [AllowAnonymous]
     public async Task<IActionResult> Index(int productId)
     {
         var product = await _httpClient.GetFromJsonAsync<ProductViewModel>(

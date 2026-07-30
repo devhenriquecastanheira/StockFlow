@@ -17,6 +17,7 @@ public class ProductsController : Controller
         _httpClient = httpClientFactory.CreateClient("StockFlowApi");
     }
 
+    [AllowAnonymous]
     public async Task<IActionResult> Index()
     {
         var products = await _httpClient.GetFromJsonAsync<List<ProductViewModel>>("api/products")
@@ -35,6 +36,7 @@ public class ProductsController : Controller
         return View(products);
     }
 
+    [AllowAnonymous]
     public async Task<IActionResult> Details(int? id)
     {
         if (id == null)

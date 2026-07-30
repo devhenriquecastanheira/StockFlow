@@ -50,7 +50,7 @@
                 </p>
             }
 
-            @if (User.IsInRole("Cliente"))
+            @if (!User.IsInRole("Admin") && !User.IsInRole("Operador"))
             {
                 @if (Model.Variants.Count == 0)
                 {
@@ -83,7 +83,10 @@
                         </div>
 
                         <button type="submit" class="btn btn-primary">Adicionar ao carrinho</button>
-                        <a asp-controller="Cart" asp-action="Index" class="btn btn-secondary">Ver carrinho</a>
+                        @if (User.IsInRole("Cliente"))
+                        {
+                            <a asp-controller="Cart" asp-action="Index" class="btn btn-secondary">Ver carrinho</a>
+                        }
                     </form>
                 }
             }
