@@ -1,10 +1,10 @@
-﻿@model OrderViewModel
+@model OrderViewModel
 
 @{
-    ViewData["Title"] = "Revisar carrinho";
+    ViewData["Title"] = "Detalhes do pedido";
 }
 
-<h1>Revisar carrinho</h1>
+<h1>Detalhes do pedido</h1>
 
 @if (TempData["Error"] is not null)
 {
@@ -20,101 +20,146 @@
     </div>
 }
 
-<div>
-    <h4>Dados do pedido</h4>
-    <hr />
-    <dl class="row">
-        <dt class="col-sm-2">Nome do Cliente</dt>
-        <dd class="col-sm-10">@Model.CustomerName</dd>
-        <dt class="col-sm-2">Email do Cliente</dt>
-        <dd class="col-sm-10">@Model.CustomerEmail</dd>
-        <dt class="col-sm-2">Entrega</dt>
-        <dd class="col-sm-10">
-            @if (string.IsNullOrWhiteSpace(Model.DeliveryStreet))
-            {
-                <span>-</span>
-            }
-            else
-            {
-                <span>@Model.DeliveryStreet, @Model.DeliveryNumber - @Model.DeliveryCity/@Model.DeliveryState</span>
-            }
-        </dd>
-        <dt class="col-sm-2">Status</dt>
-        <dd class="col-sm-10">@GetMovementTypeName(Model.Status)</dd>
-        <dt class="col-sm-2">Data de Criação</dt>
-        <dd class="col-sm-10">@Model.CreatedAt.ToString("dd/MM/yyyy")</dd>
-        <dt class="col-sm-2">Total</dt>
-        <dd class="col-sm-10 fw-bold">R$ @Model.Total.ToString("F2")</dd>
-    </dl>
+<div class="card">
+    <div class="card-body">
+        <h4>Pedido #@Model.Id</h4>
 
-    @if (Model.Invoice is not null)
-    {
-        <h4>Fatura</h4>
-        <dl class="row">
-            <dt class="col-sm-2">Número</dt>
-            <dd class="col-sm-10">@Model.Invoice.Number</dd>
-            <dt class="col-sm-2">Emissão</dt>
-            <dd class="col-sm-10">@Model.Invoice.IssuedAt.ToString("dd/MM/yyyy HH:mm")</dd>
-            <dt class="col-sm-2">Valor</dt>
-            <dd class="col-sm-10 fw-bold">R$ @Model.Invoice.TotalAmount.ToString("F2")</dd>
-        </dl>
-
-        <a asp-action="Invoice" asp-route-orderId="@Model.Id" class="btn btn-secondary">Baixar fatura em PDF</a>
-    }
-
-    @if (Model.Status == OrderStatusViewModel.Pending)
-    {
-        <form asp-action="ConfirmOrder" asp-route-orderId="@Model.Id" method="post" style="display:inline">
-            <button type="submit" class="btn btn-primary">Finalizar compra</button>
-        </form>
-    }
-
-    @if (Model.Items.Count == 0)
-    {
-        <p>Nenhum item adicionado.</p>
-    }
-    else
-    {
         <table class="table">
-            <thead>
-                <tr>
-                    <th>Produto</th>
-                    <th>Tamanho</th>
-                    <th>Cor</th>
-                    <th class="text-end">Quantidade</th>
-                    <th class="text-end">Preço unitário</th>
-                    <th class="text-end">Subtotal</th>
-                    <th>Ações</th>
-                </tr>
-            </thead>
             <tbody>
-                @foreach (var item in Model.Items)
-                {
-                    <tr>
-                        <td>@item.ProductName</td>
-                        <td>@item.Size</td>
-                        <td>@item.Color</td>
-                        <td class="text-end">@item.Quantity</td>
-                        <td class="text-end">R$ @item.UnitPrice.ToString("F2")</td>
-                        <td class="text-end fw-bold">R$ @item.SubTotal.ToString("F2")</td>
-                        <td>
-                            @if (Model.Status == OrderStatusViewModel.Pending)
-                            {
-                                <a asp-action="RemoveItem" asp-route-orderId="@Model.Id" asp-route-itemId="@item.Id">Remover</a>
-                            }
-                        </td>
-                    </tr>
-                }
+                <tr>
+                    <th>Cliente</th>
+                    <td>@Model.CustomerName</td>
+                </tr>
+                <tr>
+                    <th>Email</th>
+                    <td>@Model.CustomerEmail</td>
+                </tr>
+                <tr>
+                    <th>Entrega</th>
+                    <td>
+                        @if (string.IsNullOrWhiteSpace(Model.DeliveryStreet))
+                        {
+                            <span>-</span>
+                        }
+                        else
+                        {
+                            <span>@Model.DeliveryStreet, @Model.DeliveryNumber - @Model.DeliveryCity/@Model.DeliveryState</span>
+                        }
+                    </td>
+                </tr>
+                <tr>
+                    <th>Status</th>
+                    <td>@Model.Status</td>
+                </tr>
+                <tr>
+                    <th>Data</th>
+                    <td>@Model.CreatedAt.ToString("dd/MM/yyyy HH:mm")</td>
+                </tr>
+                <tr>
+                    <th>Itens</th>
+                    <td>@Model.Items.Count itens</td>
+                </tr>
+                <tr>
+                    <th>Total</th>
+                    <td><strong>R$ @Model.Total.ToString("F2")</strong></td>
+                </tr>
             </tbody>
         </table>
-    }
+
+        @if (Model.Status == OrderStatusViewModel.Pending)
+        {
+            <form asp-action="ConfirmOrder" asp-route-orderId="@Model.Id" method="post">
+                <button type="submit" class="btn btn-primary">Finalizar compra</button>
+            </form>
+        }
+    </div>
 </div>
-<div>
-    @if (Model.Status == OrderStatusViewModel.Pending)
-    {
-        <a asp-action="AddItem" asp-route-orderId="@Model.Id">Adicionar item</a>
-        <span>|</span>
-    }
+
+@if (Model.Invoice is not null)
+{
+    <div class="card mt-3">
+        <div class="card-body">
+            <h4>Fatura</h4>
+
+            <table class="table">
+                <tbody>
+                    <tr>
+                        <th>Número</th>
+                        <td>@Model.Invoice.Number</td>
+                    </tr>
+                    <tr>
+                        <th>Emissão</th>
+                        <td>@Model.Invoice.IssuedAt.ToString("dd/MM/yyyy HH:mm")</td>
+                    </tr>
+                    <tr>
+                        <th>Valor</th>
+                        <td><strong>R$ @Model.Invoice.TotalAmount.ToString("F2")</strong></td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <a asp-action="Invoice" asp-route-orderId="@Model.Id" class="btn btn-secondary">Baixar fatura em PDF</a>
+        </div>
+    </div>
+}
+
+<div class="card mt-3">
+    <div class="card-body">
+        <h4>Itens do pedido</h4>
+
+        @if (Model.Status == OrderStatusViewModel.Pending)
+        {
+            <p>
+                <a asp-action="AddItem" asp-route-orderId="@Model.Id" class="btn btn-secondary">Adicionar item</a>
+            </p>
+        }
+
+        @if (Model.Items.Count == 0)
+        {
+            <p>Nenhum item adicionado.</p>
+        }
+        else
+        {
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>Produto</th>
+                        <th>Tamanho</th>
+                        <th>Cor</th>
+                        <th>Quantidade</th>
+                        <th>Preço unitário</th>
+                        <th>Subtotal</th>
+                        @if (Model.Status == OrderStatusViewModel.Pending)
+                        {
+                            <th>Ações</th>
+                        }
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model.Items)
+                    {
+                        <tr>
+                            <td>@item.ProductName</td>
+                            <td>@item.Size</td>
+                            <td>@item.Color</td>
+                            <td>@item.Quantity</td>
+                            <td>R$ @item.UnitPrice.ToString("F2")</td>
+                            <td><strong>R$ @item.SubTotal.ToString("F2")</strong></td>
+                            @if (Model.Status == OrderStatusViewModel.Pending)
+                            {
+                                <td>
+                                    <a asp-action="RemoveItem" asp-route-orderId="@Model.Id" asp-route-itemId="@item.Id">Remover</a>
+                                </td>
+                            }
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+    </div>
+</div>
+
+<p class="mt-3">
     @if (User.IsInRole("Admin") || User.IsInRole("Operador"))
     {
         <a asp-action="Edit" asp-route-id="@Model.Id">Editar</a>
@@ -127,18 +172,4 @@
         <span>|</span>
         <a asp-controller="Products" asp-action="Index">Voltar ao catálogo</a>
     }
-</div>
-
-@functions {
-    private static string GetMovementTypeName(OrderStatusViewModel type)
-    {
-        return type switch
-        {
-            OrderStatusViewModel.Pending => "Pendente",
-            OrderStatusViewModel.Confirmed => "Confirmado",
-            OrderStatusViewModel.Shipped => "Enviado",
-            OrderStatusViewModel.Delivered => "Entregue",
-            _ => type.ToString()
-        };
-    }
-}
+</p>
