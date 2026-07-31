@@ -18,7 +18,7 @@ public class ProductsController : Controller
     }
 
     [AllowAnonymous]
-    public async Task<IActionResult> Index()
+    public async Task<IActionResult> Index(string? searchTerm)
     {
         var products = await _httpClient.GetFromJsonAsync<List<ProductViewModel>>("api/products")
             ?? [];
@@ -31,6 +31,14 @@ public class ProductsController : Controller
             product.Tags = await GetProductTagsAsync(product.Id);
         }
 
+        if (!string.IsNullOrWhiteSpace(searchTerm))
+        {
+            products = products
+                .Where(product => product.Name.Contains(searchTerm, StringComparison.OrdinalIgnoreCase))
+                .ToList();
+        }
+
+        ViewBag.SearchTerm = searchTerm;
         ViewBag.ApiBaseUrl = _httpClient.BaseAddress?.ToString().TrimEnd('/');
 
         return View(products);

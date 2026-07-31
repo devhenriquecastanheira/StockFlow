@@ -3,6 +3,7 @@
 @{
     ViewData["Title"] = "Produtos";
     var apiBaseUrl = ViewBag.ApiBaseUrl as string ?? string.Empty;
+    var searchTerm = ViewBag.SearchTerm as string ?? string.Empty;
 }
 
 <h1>Produtos</h1>
@@ -20,9 +21,20 @@ else if (User.IsInRole("Cliente"))
     </p>
 }
 
+<form asp-action="Index" method="get" class="mb-4">
+    <div class="input-group">
+        <input type="search"
+               name="searchTerm"
+               value="@searchTerm"
+               class="form-control"
+               placeholder="Pesquisar produto...">
+        <button class="btn btn-outline-primary" type="submit">Buscar</button>
+    </div>
+</form>
+
 @if (Model.Count == 0)
 {
-    <p>Nenhum produto cadastrado.</p>
+    <p>Nenhum produto encontrado.</p>
 }
 else
 {
