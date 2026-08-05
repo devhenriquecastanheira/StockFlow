@@ -26,6 +26,23 @@ body {
     box-shadow: 0 .25rem .75rem rgba(0, 0, 0, .05);
 }
 
+.nav-icon,
+.footer-icon,
+.titulo-icon,
+.botao-icon {
+    margin-right: 6px;
+    text-shadow: 0 0 6px rgba(209, 234, 128, .45);
+}
+
+.nav-icon,
+.footer-icon {
+    color: #b3cf6b;
+}
+
+.titulo-icon {
+    color: #d1ea80;
+}
+
 .table td,
 .table th {
     padding: .75rem 1rem;
