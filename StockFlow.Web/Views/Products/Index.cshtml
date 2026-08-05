@@ -1,9 +1,20 @@
+@using System.Globalization
 @model IReadOnlyList<ProductViewModel>
 
 @{
     ViewData["Title"] = "Produtos";
     var apiBaseUrl = ViewBag.ApiBaseUrl as string ?? string.Empty;
     var searchTerm = ViewBag.SearchTerm as string ?? string.Empty;
+    var categoryId = ViewBag.CategoryId as int?;
+    var tagId = ViewBag.TagId as int?;
+    var minPrice = ViewBag.MinPrice as decimal?;
+    var maxPrice = ViewBag.MaxPrice as decimal?;
+    var onlyWithImage = ViewBag.OnlyWithImage as bool? ?? false;
+    var sortBy = ViewBag.SortBy as string ?? string.Empty;
+    var categories = ViewBag.Categories as IReadOnlyList<CategoryViewModel> ?? [];
+    var tags = ViewBag.Tags as IReadOnlyList<TagViewModel> ?? [];
+    var minPriceText = minPrice?.ToString("0.##", CultureInfo.InvariantCulture) ?? string.Empty;
+    var maxPriceText = maxPrice?.ToString("0.##", CultureInfo.InvariantCulture) ?? string.Empty;
 }
 
 <h1>Produtos</h1>
@@ -21,14 +32,66 @@ else if (User.IsInRole("Cliente"))
     </p>
 }
 
-<form asp-action="Index" method="get" class="mb-4">
-    <div class="input-group">
-        <input type="search"
-               name="searchTerm"
-               value="@searchTerm"
-               class="form-control"
-               placeholder="Pesquisar produto...">
-        <button class="btn btn-outline-primary" type="submit">Buscar</button>
+<form asp-action="Index" method="get" class="card mb-4">
+    <div class="card-body">
+        <div class="row g-3 align-items-end">
+            <div class="col-md-4">
+                <label for="searchTerm" class="form-label">Pesquisa</label>
+                <input type="search"
+                       id="searchTerm"
+                       name="searchTerm"
+                       value="@searchTerm"
+                       class="form-control"
+                       placeholder="Nome, descrição, categoria ou tag">
+            </div>
+            <div class="col-md-3">
+                <label for="categoryId" class="form-label">Categoria</label>
+                <select id="categoryId" name="categoryId" class="form-select">
+                    <option value="">Todas</option>
+                    @foreach (var category in categories)
+                    {
+                        <option value="@category.Id" selected="@(categoryId == category.Id)">@category.Name</option>
+                    }
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label for="tagId" class="form-label">Tag</label>
+                <select id="tagId" name="tagId" class="form-select">
+                    <option value="">Todas</option>
+                    @foreach (var tag in tags)
+                    {
+                        <option value="@tag.Id" selected="@(tagId == tag.Id)">@tag.Name</option>
+                    }
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label for="sortBy" class="form-label">Ordenar</label>
+                <select id="sortBy" name="sortBy" class="form-select">
+                    <option value="" selected="@(string.IsNullOrWhiteSpace(sortBy))">Padrão</option>
+                    <option value="nome" selected="@(sortBy == "nome")">Nome</option>
+                    <option value="menor-preco" selected="@(sortBy == "menor-preco")">Menor preço</option>
+                    <option value="maior-preco" selected="@(sortBy == "maior-preco")">Maior preço</option>
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label for="minPrice" class="form-label">Preço mínimo</label>
+                <input type="number" step="0.01" min="0" id="minPrice" name="minPrice" value="@minPriceText" class="form-control">
+            </div>
+            <div class="col-md-2">
+                <label for="maxPrice" class="form-label">Preço máximo</label>
+                <input type="number" step="0.01" min="0" id="maxPrice" name="maxPrice" value="@maxPriceText" class="form-control">
+            </div>
+            <div class="col-md-3">
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" id="onlyWithImage" name="onlyWithImage" value="true" checked="@onlyWithImage">
+                    <label class="form-check-label" for="onlyWithImage">Somente com imagem</label>
+                </div>
+            </div>
+            <div class="col-md-5 text-md-end">
+                <button class="btn btn-outline-primary" type="submit">Buscar</button>
+                <a asp-action="Index" class="btn btn-outline-secondary">Limpar</a>
+            </div>
+        </div>
     </div>
 </form>
 

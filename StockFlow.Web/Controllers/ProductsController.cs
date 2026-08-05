@@ -18,11 +18,19 @@ public class ProductsController : Controller
     }
 
     [AllowAnonymous]
-    public async Task<IActionResult> Index(string? searchTerm)
+    public async Task<IActionResult> Index(
+        string? searchTerm,
+        int? categoryId,
+        int? tagId,
+        decimal? minPrice,
+        decimal? maxPrice,
+        bool onlyWithImage = false,
+        string? sortBy = null)
     {
         var products = await _httpClient.GetFromJsonAsync<List<ProductViewModel>>("api/products")
             ?? [];
         var categories = await GetCategoriesAsync();
+        var tags = await GetTagsAsync();
 
         foreach (var product in products)
         {
@@ -34,11 +42,66 @@ public class ProductsController : Controller
         if (!string.IsNullOrWhiteSpace(searchTerm))
         {
             products = products
-                .Where(product => product.Name.Contains(searchTerm, StringComparison.OrdinalIgnoreCase))
+                .Where(product =>
+                    product.Name.Contains(searchTerm, StringComparison.OrdinalIgnoreCase)
+                    || product.Description.Contains(searchTerm, StringComparison.OrdinalIgnoreCase)
+                    || product.CategoryName.Contains(searchTerm, StringComparison.OrdinalIgnoreCase)
+                    || product.Tags.Any(tag => tag.Name.Contains(searchTerm, StringComparison.OrdinalIgnoreCase)))
                 .ToList();
         }
 
+        if (categoryId.HasValue)
+        {
+            products = products
+                .Where(product => product.CategoryId == categoryId.Value)
+                .ToList();
+        }
+
+        if (tagId.HasValue)
+        {
+            products = products
+                .Where(product => product.Tags.Any(tag => tag.Id == tagId.Value))
+                .ToList();
+        }
+
+        if (minPrice.HasValue)
+        {
+            products = products
+                .Where(product => product.SalePrice >= minPrice.Value)
+                .ToList();
+        }
+
+        if (maxPrice.HasValue)
+        {
+            products = products
+                .Where(product => product.SalePrice <= maxPrice.Value)
+                .ToList();
+        }
+
+        if (onlyWithImage)
+        {
+            products = products
+                .Where(product => product.Images.Any())
+                .ToList();
+        }
+
+        products = sortBy switch
+        {
+            "nome" => products.OrderBy(product => product.Name).ToList(),
+            "menor-preco" => products.OrderBy(product => product.SalePrice).ToList(),
+            "maior-preco" => products.OrderByDescending(product => product.SalePrice).ToList(),
+            _ => products
+        };
+
         ViewBag.SearchTerm = searchTerm;
+        ViewBag.CategoryId = categoryId;
+        ViewBag.TagId = tagId;
+        ViewBag.MinPrice = minPrice;
+        ViewBag.MaxPrice = maxPrice;
+        ViewBag.OnlyWithImage = onlyWithImage;
+        ViewBag.SortBy = sortBy;
+        ViewBag.Categories = categories;
+        ViewBag.Tags = tags;
         ViewBag.ApiBaseUrl = _httpClient.BaseAddress?.ToString().TrimEnd('/');
 
         return View(products);
