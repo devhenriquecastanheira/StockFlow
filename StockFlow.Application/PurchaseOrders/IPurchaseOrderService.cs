@@ -9,4 +9,5 @@ public interface IPurchaseOrderService
     Task<PurchaseOrder> AddPurchaseOrderAsync(PurchaseOrder purchaseOrder);
     Task<PurchaseOrder?> AddPurchaseOrderItemAsync(int purchaseOrderId, PurchaseOrderItem item);
     Task<PurchaseOrder?> ReceiveAsync(int id, int warehouseId);
+    Task<bool> DeletePurchaseOrderAsync(int id);
 }

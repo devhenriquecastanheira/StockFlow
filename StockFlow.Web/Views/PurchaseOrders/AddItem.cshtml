@@ -6,8 +6,8 @@
 
 <h1>Adicionar item</h1>
 
-<div class="row">
-    <div class="col-md-4">
+<div class="card">
+    <div class="card-body">
         <form asp-action="AddItem" method="post">
             <input type="hidden" asp-for="PurchaseOrderId" />
 
@@ -28,11 +28,8 @@
 
             <div class="form-group">
                 <input type="submit" value="Salvar" class="btn btn-primary" />
+                <a asp-action="Details" asp-route-id="@Model.PurchaseOrderId" class="btn btn-secondary">Voltar</a>
             </div>
         </form>
     </div>
-</div>
-
-<div>
-    <a asp-action="Details" asp-route-id="@Model.PurchaseOrderId">Voltar</a>
 </div>

@@ -4,26 +4,28 @@
     ViewData["Title"] = "Pedidos de compra";
 }
 
-<h1>Pedidos de compra</h1>
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h1 class="mb-0">Pedidos de compra</h1>
+    <a asp-action="Create" class="btn btn-primary">Novo pedido de compra</a>
+</div>
 
-<p>
-    <a asp-action="Create">Novo pedido de compra</a>
-</p>
-
-@if (Model.Count == 0)
-{
-    <p>Nenhum pedido cadastrado.</p>
-}
-else
-{
-    <table class="table">
+<div class="card">
+    <div class="card-body">
+        @if (Model.Count == 0)
+        {
+            <p class="mb-0">Nenhum pedido cadastrado.</p>
+        }
+        else
+        {
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
         <thead>
             <tr>
                 <th>Fornecedor</th>
                 <th>Status</th>
                 <th>Data</th>
                 <th class="text-end">Total</th>
-                <th></th>
+                <th class="text-end"></th>
             </tr>
         </thead>
         <tbody>
@@ -34,11 +36,15 @@ else
                     <td>@order.Status</td>
                     <td>@order.CreatedAt.ToString("dd/MM/yyyy")</td>
                     <td class="text-end">R$ @order.Total.ToString("F2")</td>
-                    <td>
-                        <a asp-action="Details" asp-route-id="@order.Id">Detalhes</a>
+                    <td class="text-end">
+                        <a asp-action="Details" asp-route-id="@order.Id" class="btn btn-sm btn-outline-secondary">Detalhes</a>
+                        <a asp-action="Delete" asp-route-id="@order.Id" class="btn btn-sm btn-danger">Excluir</a>
                     </td>
                 </tr>
             }
         </tbody>
-    </table>
-}
+                </table>
+            </div>
+        }
+    </div>
+</div>

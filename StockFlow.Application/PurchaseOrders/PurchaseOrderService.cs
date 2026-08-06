@@ -102,4 +102,18 @@ public class PurchaseOrderService : IPurchaseOrderService
 
         return purchaseOrder;
     }
+
+    public async Task<bool> DeletePurchaseOrderAsync(int id)
+    {
+        var purchaseOrder = await _purchaseOrderRepository.GetByIdAsync(id);
+
+        if (purchaseOrder is null)
+        {
+            return false;
+        }
+
+        await _purchaseOrderRepository.DeleteAsync(purchaseOrder);
+
+        return true;
+    }
 }

@@ -133,4 +133,47 @@ public class PurchaseOrdersController : Controller
             Text = $"{variant.ProductName} - {variant.Size} - {variant.Color}"
         }).ToList();
     }
+    public async Task<IActionResult> Delete(int? id)
+    {
+        if (id == null)
+        {
+            return NotFound();
+        }
+
+        var response = await _httpClient.GetAsync($"api/purchaseorders/{id}");
+
+        if (response.StatusCode == System.Net.HttpStatusCode.NotFound)
+        {
+            return NotFound();
+        }
+
+        response.EnsureSuccessStatusCode();
+
+        var order = await response.Content.ReadFromJsonAsync<PurchaseOrderViewModel>();
+
+        if (order is null)
+        {
+            return NotFound();
+        }
+
+        var suppliers = await _httpClient.GetFromJsonAsync<List<SupplierViewModel>>("api/suppliers") ?? [];
+        order.SupplierName = suppliers.FirstOrDefault(s => s.Id == order.SupplierId)?.Name ?? "";
+
+        return View(order);
+    }
+
+    [HttpPost, ActionName("Delete")]
+    public async Task<IActionResult> DeleteConfirmed(int id)
+    {
+        var response = await _httpClient.DeleteAsync($"api/purchaseorders/{id}");
+
+        if (response.StatusCode == System.Net.HttpStatusCode.NotFound)
+        {
+            return NotFound();
+        }
+
+        response.EnsureSuccessStatusCode();
+
+        return RedirectToAction(nameof(Index));
+    }
 }
