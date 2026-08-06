@@ -35,7 +35,23 @@ public class StockController : Controller
                 $"api/stock/movements/{productVariantId}")
             ?? [];
 
+        var warehouses = await _httpClient.GetFromJsonAsync<List<WarehouseViewModel>>("api/warehouses")
+            ?? [];
+
+        foreach (var movement in movements)
+        {
+            var warehouse = warehouses.FirstOrDefault(warehouse => warehouse.Id == movement.WarehouseId);
+            movement.WarehouseName = warehouse?.Name ?? movement.WarehouseId.ToString();
+        }
+
+        var variants = await _httpClient.GetFromJsonAsync<List<ProductVariantViewModel>>("api/products/variants")
+            ?? [];
+        var variant = variants.FirstOrDefault(variant => variant.Id == productVariantId.Value);
+
         ViewBag.ProductVariantId = productVariantId.Value;
+        ViewBag.ProductVariantName = variant is null
+            ? productVariantId.Value.ToString()
+            : $"{variant.ProductName} - {variant.Size} - {variant.Color} - {variant.Sku}";
 
         return View(movements);
     }

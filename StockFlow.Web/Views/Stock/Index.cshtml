@@ -13,31 +13,37 @@
         .ToList();
 }
 
-<h1>Estoque</h1>
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h1 class="mb-0">Estoque</h1>
+    <a asp-action="Create" class="btn btn-primary">Nova movimentação</a>
+</div>
 
-<p>
-    <a asp-action="Create">Nova movimentação</a>
-</p>
 @if (Model.Count > 0)
 {
-    <div class="mb-4">
-        <h2 class="h5">Quantidade em estoque</h2>
-        <canvas id="stockChart"></canvas>
+    <div class="card mb-4">
+        <div class="card-body">
+            <h2 class="h5">Quantidade em estoque</h2>
+            <canvas id="stockChart"></canvas>
+        </div>
     </div>
 }
-@if (Model.Count == 0)
-{
-    <p>Nenhum item em estoque.</p>
-}
-else
-{
-    <table class="table">
+
+<div class="card">
+    <div class="card-body">
+        @if (Model.Count == 0)
+        {
+            <p class="mb-0">Nenhum item em estoque.</p>
+        }
+        else
+        {
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
         <thead>
             <tr>
                 <th>Variante</th>
                 <th>Armazém</th>
                 <th>Quantidade</th>
-                <th></th>
+                <th class="text-end"></th>
             </tr>
         </thead>
         <tbody>
@@ -57,20 +63,23 @@ else
 
                         @if (stockItem.Quantity <= stockItem.ProductVariant?.MinimumStockLevel)
                         {
-                            <span style="color: red;"> - Estoque baixo</span>
+                            <span class="text-danger"> - Estoque baixo</span>
                         }
                     </td>
 
-                    <td>
-                        <a asp-action="Details" asp-route-productVariantId="@stockItem.ProductVariantId">Movimentações</a> |
-                        <a asp-action="Create" asp-route-productVariantId="@stockItem.ProductVariantId" asp-route-warehouseId="@stockItem.WarehouseId">Movimentar</a> |
-                        <a asp-action="Transfer" asp-route-productVariantId="@stockItem.ProductVariantId" asp-route-fromWarehouseId="@stockItem.WarehouseId">Transferir</a>
+                    <td class="text-end">
+                        <a asp-action="Details" asp-route-productVariantId="@stockItem.ProductVariantId" class="btn btn-sm btn-outline-secondary">Movimentações</a>
+                        <a asp-action="Create" asp-route-productVariantId="@stockItem.ProductVariantId" asp-route-warehouseId="@stockItem.WarehouseId" class="btn btn-sm btn-secondary">Movimentar</a>
+                        <a asp-action="Transfer" asp-route-productVariantId="@stockItem.ProductVariantId" asp-route-fromWarehouseId="@stockItem.WarehouseId" class="btn btn-sm btn-secondary">Transferir</a>
                     </td>
                 </tr>
             }
         </tbody>
-    </table>
-}
+                </table>
+            </div>
+        }
+    </div>
+</div>
 
 @section Scripts {
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>

@@ -15,6 +15,8 @@ public class StockMovementViewModel
     [Range(1, int.MaxValue, ErrorMessage = "Informe o armazém.")]
     public int WarehouseId { get; set; }
 
+    public string WarehouseName { get; set; } = string.Empty;
+
     [Display(Name = "Tipo")]
     [EnumDataType(typeof(StockMovementTypeViewModel))]
     public StockMovementTypeViewModel Type { get; set; } = StockMovementTypeViewModel.Entry;
