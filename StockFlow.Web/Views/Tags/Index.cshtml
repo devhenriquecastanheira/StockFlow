@@ -4,23 +4,25 @@
     ViewData["Title"] = "Tags";
 }
 
-<h1>Tags</h1>
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h1 class="mb-0">Tags</h1>
+    <a asp-action="Create" class="btn btn-primary">Nova tag</a>
+</div>
 
-<p>
-    <a asp-action="Create">Nova tag</a>
-</p>
-
-@if (Model.Count == 0)
-{
-    <p>Nenhuma tag cadastrada.</p>
-}
-else
-{
-    <table class="table">
+<div class="card">
+    <div class="card-body">
+        @if (Model.Count == 0)
+        {
+            <p class="mb-0">Nenhuma tag cadastrada.</p>
+        }
+        else
+        {
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
         <thead>
             <tr>
                 <th>Nome</th>
-                <th></th>
+                <th class="text-end"></th>
             </tr>
         </thead>
         <tbody>
@@ -28,13 +30,16 @@ else
             {
                 <tr>
                     <td class="fw-medium">@tag.Name</td>
-                    <td>
-                        <a asp-action="Edit" asp-route-id="@tag.Id">Editar</a> |
-                        <a asp-action="Details" asp-route-id="@tag.Id">Detalhes</a> |
-                        <a asp-action="Delete" asp-route-id="@tag.Id">Excluir</a>
+                    <td class="text-end">
+                        <a asp-action="Edit" asp-route-id="@tag.Id" class="btn btn-sm btn-secondary">Editar</a>
+                        <a asp-action="Details" asp-route-id="@tag.Id" class="btn btn-sm btn-outline-secondary">Detalhes</a>
+                        <a asp-action="Delete" asp-route-id="@tag.Id" class="btn btn-sm btn-danger">Excluir</a>
                     </td>
                 </tr>
             }
         </tbody>
-    </table>
-}
+                </table>
+            </div>
+        }
+    </div>
+</div>
