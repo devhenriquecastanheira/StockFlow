@@ -22,7 +22,7 @@
 @if (User.IsInRole("Admin") || User.IsInRole("Operador"))
 {
     <p>
-        <a asp-action="Create">Novo produto</a>
+        <a asp-action="Create" class="btn btn-primary">Novo produto</a>
     </p>
 }
 else if (User.IsInRole("Cliente"))
@@ -107,7 +107,7 @@ else
             var images = product.Images ?? [];
             var mainImage = images.FirstOrDefault(image => image.IsMain) ?? images.FirstOrDefault();
 
-            <div class="produto-card">
+            <div class="produto-card card">
                 @if (mainImage is not null)
                 {
                     <img src="@(apiBaseUrl + mainImage.ImageUrl)" alt="@product.Name" />
@@ -147,7 +147,6 @@ else
                 </div>
 
                 <a class="produto-botao" asp-action="Details" asp-route-id="@product.Id">Detalhes</a>
-                <a class="produto-botao" asp-controller="ProductVariants" asp-action="Index" asp-route-productId="@product.Id">Ver opções</a>
 
                 @if (User.IsInRole("Admin") || User.IsInRole("Operador"))
                 {

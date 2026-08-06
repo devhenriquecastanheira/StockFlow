@@ -37,7 +37,8 @@
     </div>
 
     <div class="col-md-7">
-        <div class="border p-3">
+        <div class="card">
+            <div class="card-body">
             <h2>@Model.SalePrice.ToString("C")</h2>
 
             @if (Model.Tags.Count > 0)
@@ -95,22 +96,22 @@
             {
                 <p><strong>Preço de custo:</strong> @Model.CostPrice.ToString("C")</p>
             }
+            </div>
         </div>
     </div>
 </div>
 
-<hr />
-
-<section>
+<section class="card mb-4">
+    <div class="card-body">
     <h2>Descrição</h2>
     <p>@(string.IsNullOrWhiteSpace(Model.Description) ? "Produto sem descrição." : Model.Description)</p>
+    </div>
 </section>
 
 @if (User.IsInRole("Admin") || User.IsInRole("Operador"))
 {
-    <hr />
-
-    <div>
+    <div class="card">
+        <div class="card-body">
         <h3>Tags</h3>
 
         @if (Model.Tags.Count == 0)
@@ -176,16 +177,15 @@
                 </form>
             </div>
         }
+        </div>
     </div>
 }
 
 <div class="mt-3">
     @if (User.IsInRole("Admin") || User.IsInRole("Operador"))
     {
-        <a asp-action="Edit" asp-route-id="@Model.Id">Editar</a>
-        <span>|</span>
-        <a asp-controller="ProductVariants" asp-action="Index" asp-route-productId="@Model.Id">Variantes</a>
-        <span>|</span>
+        <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-primary">Editar</a>
+        <a asp-controller="ProductVariants" asp-action="Index" asp-route-productId="@Model.Id" class="btn btn-secondary">Variantes</a>
     }
-    <a asp-action="Index">Voltar</a>
+    <a asp-action="Index" class="btn btn-secondary">Voltar</a>
 </div>
