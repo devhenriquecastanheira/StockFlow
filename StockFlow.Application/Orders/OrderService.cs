@@ -1,7 +1,6 @@
 using FluentValidation;
 using QuestPDF.Fluent;
 using QuestPDF.Helpers;
-using QuestPDF.Infrastructure;
 using StockFlow.Application.Email;
 using StockFlow.Application.Stock;
 using StockFlow.Domain.Entities;
@@ -235,6 +234,8 @@ public class OrderService : IOrderService
 
         await _orderValidator.ValidateAndThrowAsync(order);
         await _orderRepository.CheckoutAsync(order, cart.Items.ToList());
+
+        await SendCheckoutEmailAsync(order);
 
         return await GetOrderAsync(order.Id);
     }
@@ -500,6 +501,28 @@ public class OrderService : IOrderService
             pdf,
             $"fatura-{order.Id}.pdf",
             "application/pdf");
+    }
+
+    private async Task SendCheckoutEmailAsync(Order order)
+    {
+        var mensagem = "";
+        var total = order.Items.Sum(item => item.Quantity * item.UnitPrice);
+
+        foreach (var item in order.Items)
+        {
+            mensagem += $"{item.ProductVariant.Product.Name} - {item.ProductVariant.Size} - {item.ProductVariant.Color} - {item.Quantity} x {item.UnitPrice.ToString("C")}<br>";
+        }
+
+        await _emailSender.SendEmailAsync(
+            order.CustomerEmail,
+            $"Recebemos o seu pedido #{order.Id}",
+            $"<p>Olá, {order.CustomerName}!</p>" +
+            $"<p>Recebemos o seu pedido #{order.Id}.</p>" +
+            $"<p>Endereço de entrega: {order.DeliveryStreet}, {order.DeliveryNumber} - {order.DeliveryCity}/{order.DeliveryState}</p>" +
+            "<p>Itens do pedido:</p>" +
+            mensagem +
+            $"<p><strong>Total: {total.ToString("C")}</strong></p>" +
+            "<p>Você receberá outro email quando o pedido for confirmado.</p>");
     }
 
     private static InvoiceDto? GetInvoiceDto(Order order)
