@@ -22,10 +22,23 @@ public class EmailSender : IEmailSender
         string attachmentContentType = "application/octet-stream")
     {
         var settings = _configuration.GetSection("EmailSettings");
+        var smtpServer = settings["SmtpServer"];
+        var port = settings["Port"];
+        var senderName = settings["SenderName"];
+        var senderEmail = settings["SenderEmail"];
+        var password = settings["Password"];
+
+        if (string.IsNullOrWhiteSpace(smtpServer) ||
+            string.IsNullOrWhiteSpace(port) ||
+            string.IsNullOrWhiteSpace(senderEmail) ||
+            string.IsNullOrWhiteSpace(password))
+        {
+            throw new InvalidOperationException("As configurações de envio de email estão incompletas.");
+        }
 
         using var mailMessage = new MailMessage
         {
-            From = new MailAddress(settings["SenderEmail"]!, settings["SenderName"]),
+            From = new MailAddress(senderEmail, senderName),
             Subject = subject,
             Body = body,
             IsBodyHtml = true
@@ -42,9 +55,9 @@ public class EmailSender : IEmailSender
                 attachmentContentType));
         }
 
-        using var smtpClient = new SmtpClient(settings["SmtpServer"], int.Parse(settings["Port"]!))
+        using var smtpClient = new SmtpClient(smtpServer, int.Parse(port))
         {
-            Credentials = new NetworkCredential(settings["SenderEmail"], settings["Password"]),
+            Credentials = new NetworkCredential(senderEmail, password),
             EnableSsl = true
         };
 
