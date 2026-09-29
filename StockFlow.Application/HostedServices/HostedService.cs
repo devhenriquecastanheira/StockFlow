@@ -1,3 +1,4 @@
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using StockFlow.Application.Email;
@@ -44,6 +45,13 @@ public class HostedService : IHostedService, IDisposable
 
         var stockRepository = scope.ServiceProvider.GetRequiredService<IStockRepository>();
         var emailSender = scope.ServiceProvider.GetRequiredService<IEmailSender>();
+        var configuration = scope.ServiceProvider.GetRequiredService<IConfiguration>();
+        var alertRecipient = configuration["EmailSettings:StockAlertRecipient"];
+
+        if (string.IsNullOrWhiteSpace(alertRecipient))
+        {
+            throw new InvalidOperationException("Configure EmailSettings:StockAlertRecipient usando User Secrets ou variaveis de ambiente.");
+        }
 
         var produtos = await stockRepository.GetStockItemsAsync();
 
@@ -66,7 +74,7 @@ public class HostedService : IHostedService, IDisposable
         }
 
         await emailSender.SendEmailAsync(
-            "henrique.fc18@gmail.com",
+            alertRecipient,
             "Estoque baixo",
             mensagem);
     }
